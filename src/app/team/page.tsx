@@ -7,7 +7,7 @@ import { publicFileExists } from "@/lib/assets";
 export const metadata: Metadata = {
   title: "Team",
   description:
-    "The people building the Baghewala digital twin: reservoir physics, machine learning, backend, frontend, data engineering, and hardware.",
+    "The people building the Baghewala digital twin: ML development, research, UI/UX design, data analysis, and the project website.",
 };
 
 export default function TeamPage() {
@@ -20,8 +20,8 @@ export default function TeamPage() {
           The team
         </h1>
         <p className="mt-4 max-w-2xl text-[15px] text-body-text">
-          Six people across reservoir physics, machine learning, software, data,
-          and hardware. Each one owns a part of the model end to end.
+          Seven people across ML development, research, UI/UX design, data
+          analysis, and the project website, with a mentor guiding the direction.
         </p>
 
         <ul className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

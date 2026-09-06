@@ -9,6 +9,7 @@ const FALLBACK: Record<number, string> = {
   4: "bg-signature-mustard text-ink",
   5: "bg-signature-mint text-ink",
   6: "bg-signature-peach text-ink",
+  7: "bg-signature-forest text-white",
 };
 
 function initials(name: string): string {

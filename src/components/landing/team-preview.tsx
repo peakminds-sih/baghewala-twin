@@ -12,7 +12,7 @@ export function TeamPreview() {
     <Section surface="canvas">
       <SectionHeading title="The team" />
 
-      <ul className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+      <ul className="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-7">
         {members.map((member) => (
           <li key={member.id} className="flex flex-col items-center text-center">
             <TeamPhoto
