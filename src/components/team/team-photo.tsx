@@ -42,7 +42,7 @@ export function TeamPhoto({
       <img
         src={member.photo}
         alt={`${member.name}, ${member.role}`}
-        className={cn("object-cover", radius, className)}
+        className={cn("object-cover object-top", radius, className)}
       />
     );
   }

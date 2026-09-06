@@ -4,6 +4,7 @@ import { TwoFailures } from "@/components/landing/two-failures";
 import { WhatWeBuilt } from "@/components/landing/what-we-built";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { WhatItDoes } from "@/components/landing/what-it-does";
+import { ModelPreview } from "@/components/landing/model-preview";
 import { WhatChanges } from "@/components/landing/what-changes";
 import { NotClaimed } from "@/components/landing/not-claimed";
 import { DocumentsPreview } from "@/components/landing/documents-preview";
@@ -19,6 +20,7 @@ export default function HomePage() {
       <WhatWeBuilt />
       <HowItWorks />
       <WhatItDoes />
+      <ModelPreview />
       <WhatChanges />
       <NotClaimed />
       <DocumentsPreview />
