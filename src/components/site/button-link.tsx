@@ -2,15 +2,15 @@ import Link from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-// The Airtable button pair from DESIGN.md. Default and pressed states only.
+// The two link-buttons from DESIGN.md §5.1. Default and pressed states only.
 const buttonLink = cva(
-  "inline-flex items-center justify-center gap-2 rounded-lg px-6 py-4 text-base font-medium leading-none transition-colors outline-none focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+  "inline-flex items-center justify-center gap-2 rounded-lg px-6 py-4 text-base font-medium leading-none transition-colors",
   {
     variants: {
       variant: {
-        primary: "bg-primary text-white active:bg-[#0d1218]",
+        primary: "bg-green text-on-green hover:bg-green-hover active:bg-green-hover",
         secondary:
-          "border border-hairline bg-canvas text-ink active:bg-surface-soft",
+          "border border-hairline-strong bg-cream text-ink active:bg-panel",
       },
     },
     defaultVariants: { variant: "primary" },

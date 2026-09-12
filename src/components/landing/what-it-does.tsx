@@ -37,15 +37,10 @@ export function WhatItDoes() {
 
       <ol className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {FUNCTIONS.map((fn, i) => (
-          <li
-            key={fn.title}
-            className="flex h-full flex-col rounded-md border border-hairline bg-canvas p-6"
-          >
-            <span className="text-[13px] font-medium text-muted-ink">
-              {i + 1}
-            </span>
-            <h3 className="mt-2 text-[16px] font-medium text-ink">{fn.title}</h3>
-            <p className="mt-2 text-[14px] text-body-text">{fn.body}</p>
+          <li key={fn.title} className="flex h-full flex-col rounded-md border border-hairline bg-cream p-6">
+            <span className="text-caption font-medium text-ink-muted">{i + 1}</span>
+            <h3 className="mt-2 text-h4 font-semibold text-ink">{fn.title}</h3>
+            <p className="mt-2 text-ui text-ink">{fn.body}</p>
           </li>
         ))}
       </ol>

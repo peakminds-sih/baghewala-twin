@@ -14,18 +14,11 @@ export function DocumentsPreview() {
 
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {preview.map((doc) => (
-          <DocumentCard
-            key={doc.id}
-            doc={doc}
-            available={publicFileExists(doc.file)}
-          />
+          <DocumentCard key={doc.id} doc={doc} available={publicFileExists(doc.file)} />
         ))}
       </div>
 
-      <Link
-        href="/documents"
-        className="mt-8 inline-flex items-center gap-2 rounded-sm text-[14px] font-medium text-link outline-none focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-2"
-      >
+      <Link href="/documents" className="mt-8 inline-flex items-center gap-2 rounded-sm text-ui font-medium text-green">
         View all documents
         <ArrowRight className="size-4" aria-hidden="true" />
       </Link>

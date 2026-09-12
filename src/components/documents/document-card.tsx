@@ -17,27 +17,25 @@ export function DocumentCard({
   return (
     <article
       className={cn(
-        "flex flex-col rounded-md border border-hairline bg-canvas p-6",
+        "flex flex-col rounded-md border border-hairline bg-cream p-6",
         !available && "opacity-70"
       )}
     >
       <div className="flex items-center justify-between">
-        <span className="rounded-sm bg-surface-soft px-2 py-1 text-[12px] font-medium tracking-[0.16px] text-muted-ink">
+        <span className="rounded-sm bg-panel px-2 py-1 text-caption font-medium text-ink-muted">
           {doc.category}
         </span>
-        <span className="text-[13px] text-muted-ink">
+        <span className="text-ui text-ink-muted">
           {fileType} · {doc.fileSize}
         </span>
       </div>
 
-      <h3 className="mt-4 line-clamp-2 text-[18px] font-medium text-ink">
+      <h3 className="mt-4 line-clamp-2 text-h4 font-semibold text-ink">
         {doc.title}
       </h3>
-      <p className="mt-2 line-clamp-3 text-[14px] text-body-text">
-        {doc.description}
-      </p>
+      <p className="mt-2 line-clamp-3 text-ui text-ink">{doc.description}</p>
 
-      <p className="mt-4 text-[13px] text-muted-ink">
+      <p className="mt-4 text-caption text-ink-muted">
         Updated {formatDate(doc.updated)}
       </p>
 
@@ -48,7 +46,7 @@ export function DocumentCard({
               href={doc.file}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[14px] font-medium text-white outline-none transition-colors active:bg-[#0d1218] focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-lg bg-green px-4 py-2.5 text-ui font-medium text-on-green transition-colors hover:bg-green-hover"
             >
               <ExternalLink className="size-4" aria-hidden="true" />
               View
@@ -56,14 +54,14 @@ export function DocumentCard({
             <a
               href={doc.file}
               download
-              className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-canvas px-4 py-2.5 text-[14px] font-medium text-ink outline-none transition-colors active:bg-surface-soft focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-lg border border-hairline-strong bg-cream px-4 py-2.5 text-ui font-medium text-ink transition-colors hover:bg-panel"
             >
               <Download className="size-4" aria-hidden="true" />
               Download
             </a>
           </>
         ) : (
-          <span className="text-[13px] font-medium text-muted-ink">
+          <span className="text-ui font-medium text-ink-muted">
             File not added yet.
           </span>
         )}

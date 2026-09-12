@@ -14,12 +14,10 @@ export default function TeamPage() {
   const members = [...team].sort((a, b) => a.id - b.id);
 
   return (
-    <div className="bg-canvas pt-28 pb-16 md:pt-36 md:pb-24">
+    <div className="bg-cream pt-28 pb-16 md:pt-36 md:pb-24">
       <Container>
-        <h1 className="text-[28px] leading-tight font-normal text-ink md:text-[32px]">
-          The team
-        </h1>
-        <p className="mt-4 max-w-2xl text-[15px] text-body-text">
+        <h1 className="font-serif text-display font-medium text-green">The team</h1>
+        <p className="mt-4 max-w-2xl text-body-lg text-ink-muted">
           Seven people across ML development, research, UI/UX design, data
           analysis, and the project website, with a mentor guiding the direction.
         </p>
@@ -27,10 +25,7 @@ export default function TeamPage() {
         <ul className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {members.map((member) => (
             <li key={member.id}>
-              <TeamCard
-                member={member}
-                available={publicFileExists(member.photo)}
-              />
+              <TeamCard member={member} available={publicFileExists(member.photo)} />
             </li>
           ))}
         </ul>

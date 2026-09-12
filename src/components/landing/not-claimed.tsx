@@ -10,19 +10,19 @@ const NOTES = [
 // Quiet engineering note, not a warning: muted surface, smaller type.
 export function NotClaimed() {
   return (
-    <section className="scroll-mt-16 bg-canvas py-16 md:py-24">
+    <section className="scroll-mt-16 bg-cream py-16 md:py-24">
       <Container>
-        <div className="rounded-md border border-hairline bg-surface-soft p-6 md:p-10">
-          <h2 className="text-[20px] font-normal text-muted-ink">
+        <div className="rounded-md border border-hairline bg-panel p-6 md:p-10">
+          <h2 className="text-h4 font-normal text-ink-muted">
             What we do not claim yet
           </h2>
-          <p className="mt-3 max-w-2xl text-[13px] text-muted-ink">
+          <p className="mt-3 max-w-2xl text-caption text-ink-muted">
             Every parameter in our model has a value, a unit, a source, and a
             confidence level. These four are still assumptions.
           </p>
           <ol className="mt-6 space-y-3">
             {NOTES.map((note, i) => (
-              <li key={i} className="flex gap-3 text-[13px] text-muted-ink">
+              <li key={i} className="flex gap-3 text-caption text-ink-muted">
                 <span className="shrink-0 font-medium">{i + 1}.</span>
                 <span>{note}</span>
               </li>

@@ -25,22 +25,19 @@ export function WhatWeBuilt() {
 
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {CARDS.map((card) => (
-          <div
-            key={card.title}
-            className="rounded-md border border-hairline bg-canvas p-6"
-          >
-            <h3 className="text-[16px] font-medium text-ink">{card.title}</h3>
-            <p className="mt-3 text-[14px] text-body-text">{card.body}</p>
+          <div key={card.title} className="rounded-md border border-hairline bg-cream p-6">
+            <h3 className="text-h4 font-semibold text-ink">{card.title}</h3>
+            <p className="mt-3 text-ui text-ink">{card.body}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-8 space-y-4 rounded-md border border-hairline bg-surface-soft p-6">
-        <p className="text-[15px] text-ink">
+      <div className="mt-8 space-y-4 rounded-md border border-hairline bg-panel p-6">
+        <p className="text-body text-ink">
           Objective: produce the most oil for each unit of steam. Constraint:
           keep the pump speed below the rod-floating limit.
         </p>
-        <p className="text-[14px] text-body-text">
+        <p className="text-ui text-ink">
           Rod safety is a constraint, not the goal. If the goal were zero
           failures, the answer would be to run the pump at minimum speed forever.
           That gives almost no oil. An accurate safe limit lets the pump run near

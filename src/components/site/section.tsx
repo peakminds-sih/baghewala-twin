@@ -3,11 +3,14 @@ import { Container } from "./container";
 
 type Surface = "canvas" | "soft" | "cream" | "dark";
 
+// Roles stay fixed; the token values switch with the theme (DESIGN.md §8).
+// "dark" uses the green fill with its matching on-green text, never white,
+// so it stays readable when green turns light in dark mode.
 const SURFACE: Record<Surface, string> = {
-  canvas: "bg-canvas text-body-text",
-  soft: "bg-surface-soft text-body-text",
-  cream: "bg-signature-cream text-ink",
-  dark: "bg-surface-dark text-white",
+  canvas: "bg-cream text-ink",
+  soft: "bg-panel text-ink",
+  cream: "bg-gold-tint text-ink",
+  dark: "bg-green text-on-green",
 };
 
 // A major editorial band: 96px vertical rhythm, one surface colour, one container.
@@ -34,7 +37,8 @@ export function Section({
   );
 }
 
-// Standard section header: heading plus one optional line of text.
+// Standard section header: heading plus one optional line of text. The
+// title is a section title (DESIGN.md §3.2: h1 scale, serif, green).
 export function SectionHeading({
   title,
   lead,
@@ -46,10 +50,8 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn("max-w-2xl", className)}>
-      <h2 className="text-[28px] leading-tight font-normal text-ink md:text-[32px]">
-        {title}
-      </h2>
-      {lead ? <p className="mt-4 text-[15px] text-body-text">{lead}</p> : null}
+      <h2 className="font-serif text-h1 font-medium text-green">{title}</h2>
+      {lead ? <p className="mt-4 text-body-lg text-ink-muted">{lead}</p> : null}
     </div>
   );
 }

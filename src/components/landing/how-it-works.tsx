@@ -45,24 +45,17 @@ export function HowItWorks() {
               className={cn(
                 "flex flex-col rounded-md border p-5",
                 isApproval
-                  ? "border-ink bg-canvas ring-1 ring-ink"
-                  : "border-hairline bg-canvas"
+                  ? "border-ink bg-cream ring-1 ring-ink"
+                  : "border-hairline bg-cream"
               )}
             >
-              <span
-                className={cn(
-                  "text-[13px] font-medium",
-                  isApproval ? "text-ink" : "text-muted-ink"
-                )}
-              >
+              <span className={cn("text-caption font-medium", isApproval ? "text-ink" : "text-ink-muted")}>
                 Step {i + 1}
               </span>
-              <h3 className="mt-2 text-[15px] font-medium text-ink">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-[13px] text-body-text">{step.body}</p>
+              <h3 className="mt-2 text-ui font-semibold text-ink">{step.title}</h3>
+              <p className="mt-2 text-caption text-ink">{step.body}</p>
               {isApproval ? (
-                <p className="mt-3 text-[12px] font-medium text-ink">
+                <p className="mt-3 text-caption font-medium text-ink">
                   The operator stays in control. This is a design decision.
                 </p>
               ) : null}

@@ -4,114 +4,120 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Section, SectionHeading } from "@/components/site/section";
-import { ParameterSlider } from "@/components/model/parameter-slider";
-import { ModelChart, type ChartAxis } from "@/components/model/model-chart";
-import {
-  DEFAULT_INPUTS,
-  PARAMS,
-  simulate,
-  type ModelInputs,
-} from "@/lib/model/twin";
+import { SliderField } from "@/components/kit/slider-field";
+import { Readout } from "@/components/kit/readout";
+import { LineChart } from "@/components/charts/line-chart";
+import { DEFAULT_PARAMS, INPUT_RANGES, REFERENCE_CASE, simulateCycle } from "@/lib/physics";
 
-const PREVIEW_KEYS = ["steamVolume", "cycleLength"] as const;
-
-const viscosityLabel = (value: number) =>
-  value >= 1000 ? `${value / 1000}k` : String(value);
-
-const VISCOSITY_AXIS: ChartAxis = {
-  unit: "cP",
-  scale: "log",
-  min: 1,
-  max: 10000,
-  ticks: [1, 10, 100, 1000, 10000],
-  format: viscosityLabel,
-};
-
-const SPEED_AXIS: ChartAxis = {
-  unit: "SPM",
-  min: 0,
-  max: 15,
-  ticks: [0, 5, 10, 15],
-};
+// A small, live preview of the physics module (DESIGN.md: charts read colour
+// from CSS variables via the LineChart component). It shares the reference
+// case with the simulator, so the numbers here always match.
 
 export function ModelPreview() {
-  const [inputs, setInputs] = useState<ModelInputs>(DEFAULT_INPUTS);
-  const result = useMemo(() => simulate(inputs), [inputs]);
+  const [steamVolumeM3, setSteamVolumeM3] = useState(INPUT_RANGES.steamVolumeM3.defaultValue);
+  const [productionDays, setProductionDays] = useState(INPUT_RANGES.productionDays.defaultValue);
 
-  const days = result.series.map((p) => p.day);
-  const lines = [
-    {
-      label: "Oil viscosity",
-      color: "#181d26",
-      axis: "left" as const,
-      values: result.series.map((p) => p.viscosityCp),
-    },
-    {
-      label: "Max safe pump speed",
-      color: "#1b61c9",
-      axis: "right" as const,
-      values: result.series.map((p) => p.maxPumpSpeed),
-    },
-  ];
+  const result = useMemo(
+    () => simulateCycle({ ...REFERENCE_CASE, steamVolumeM3, productionDays }),
+    [steamVolumeM3, productionDays],
+  );
+
+  const production = result.days.filter((day) => day.phase === "production");
 
   return (
     <Section surface="soft">
       <SectionHeading
         title="See the chain move"
-        lead="Two decisions feed one model. Change the steam volume or the cycle length and watch the viscosity, the safe pump speed, and the steam–oil ratio respond."
+        lead="Two decisions feed one model. Change the steam volume or the production length and watch the safe pump speed, the steam–oil ratio, and the day the limit binds respond."
       />
 
       <div className="mt-12 grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
         <div>
           <div className="space-y-6">
-            {PARAMS.filter((p) =>
-              PREVIEW_KEYS.includes(p.key as (typeof PREVIEW_KEYS)[number]),
-            ).map((meta) => (
-              <ParameterSlider
-                key={meta.key}
-                meta={meta}
-                value={inputs[meta.key]}
-                onChange={(value) =>
-                  setInputs((prev) => ({ ...prev, [meta.key]: value }))
-                }
-              />
-            ))}
+            <SliderField
+              id="preview-steam-volume"
+              label={INPUT_RANGES.steamVolumeM3.name}
+              symbol={INPUT_RANGES.steamVolumeM3.symbol}
+              unit={INPUT_RANGES.steamVolumeM3.unit}
+              value={steamVolumeM3}
+              min={INPUT_RANGES.steamVolumeM3.min}
+              max={INPUT_RANGES.steamVolumeM3.max}
+              step={INPUT_RANGES.steamVolumeM3.step}
+              onChange={setSteamVolumeM3}
+              tier={INPUT_RANGES.steamVolumeM3.tier}
+              fieldRange={INPUT_RANGES.steamVolumeM3.fieldRange}
+            />
+            <SliderField
+              id="preview-production-days"
+              label={INPUT_RANGES.productionDays.name}
+              symbol={INPUT_RANGES.productionDays.symbol}
+              unit={INPUT_RANGES.productionDays.unit}
+              value={productionDays}
+              min={INPUT_RANGES.productionDays.min}
+              max={INPUT_RANGES.productionDays.max}
+              step={INPUT_RANGES.productionDays.step}
+              onChange={setProductionDays}
+              tier={INPUT_RANGES.productionDays.tier}
+              fieldRange={INPUT_RANGES.productionDays.fieldRange}
+            />
           </div>
 
-          <dl className="mt-8 grid grid-cols-2 gap-4">
-            <div>
-              <dt className="text-[12px] text-muted-ink">Steam–oil ratio</dt>
-              <dd className="mt-1 text-[20px] font-medium text-ink tabular-nums">
-                {Number.isFinite(result.sor) ? result.sor.toFixed(1) : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-[12px] text-muted-ink">Cooling constant τ</dt>
-              <dd className="mt-1 text-[20px] font-medium text-ink tabular-nums">
-                {result.coolingConstant.toFixed(0)} d
-              </dd>
-            </div>
-          </dl>
+          <div className="mt-8 grid grid-cols-2 gap-4">
+            <Readout
+              label="Steam–oil ratio"
+              value={result.summary.steamOilRatio}
+              digits={1}
+              kind="inferred"
+            />
+            <Readout
+              label="Day the limit binds"
+              value={result.summary.limitBindsDay}
+              unit="day"
+              digits={1}
+              kind="inferred"
+            />
+          </div>
 
           <Link
-            href="/model"
-            className="mt-6 inline-flex items-center gap-2 rounded-sm text-[14px] font-medium text-link outline-none focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-2"
+            href="/simulator"
+            className="mt-6 inline-flex items-center gap-2 rounded-sm text-ui font-medium text-green"
           >
-            Open the full model
+            Open the simulator
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
 
-        <div className="min-w-0 rounded-md border border-hairline bg-canvas p-5">
-          <ModelChart
-            days={days}
-            xLabel="Days into the production cycle"
-            left={VISCOSITY_AXIS}
-            right={SPEED_AXIS}
-            lines={lines}
-            shadeFromDay={result.floatBindsDay}
-            shadeLabel="rod-float limit"
-            ariaLabel="Line chart of oil viscosity on a logarithmic scale and the maximum safe pump speed against days into the production cycle."
+        <div className="min-w-0 rounded-md border border-hairline bg-cream p-5">
+          <LineChart
+            title="Safe pump speed falls as the zone cools"
+            subtitle="Production phase only. The set speed holds steady while the safe limit drops."
+            x={{ label: "Production day" }}
+            y={{ label: "Pump speed (SPM)" }}
+            series={[
+              {
+                id: "safe",
+                label: "Safe pump speed",
+                role: "main",
+                unit: "SPM",
+                digits: 1,
+                points: production.map((day) => ({ x: day.phaseDay, y: day.inferred.safePumpSpeedSPM })),
+              },
+              {
+                id: "set",
+                label: "Set pump speed",
+                role: "limit",
+                unit: "SPM",
+                digits: 1,
+                points: production.map((day) => ({ x: day.phaseDay, y: day.measured.pumpSpeedSPM })),
+              },
+            ]}
+            rules={[
+              {
+                y: DEFAULT_PARAMS.mechanicalMaxSPM,
+                label: `Mechanical ceiling, ${DEFAULT_PARAMS.mechanicalMaxSPM} SPM`,
+              },
+            ]}
+            formatX={(value) => `Day ${Math.round(value)}`}
           />
         </div>
       </div>

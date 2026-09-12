@@ -10,14 +10,16 @@ export const SIH_LINE =
 export const NAV_LINKS = [
   { label: "Problem", href: "/#problem" },
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Model", href: "/model" },
+  { label: "Simulator", href: "/simulator" },
+  { label: "Research", href: "/research" },
   { label: "Documents", href: "/documents" },
   { label: "Team", href: "/team" },
 ];
 
 export const PAGE_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Model", href: "/model" },
+  { label: "Simulator", href: "/simulator" },
+  { label: "Research", href: "/research" },
   { label: "Documents", href: "/documents" },
   { label: "Team", href: "/team" },
 ];

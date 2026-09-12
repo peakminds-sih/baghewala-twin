@@ -25,28 +25,23 @@ export function WhatChanges() {
 
       <ol className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {RESULTS.map((result, i) => (
-          <li
-            key={result}
-            className="flex gap-3 rounded-md border border-hairline bg-canvas p-5"
-          >
-            <span className="text-[13px] font-medium text-muted-ink">
-              {i + 1}
-            </span>
-            <span className="text-[14px] text-ink">{result}</span>
+          <li key={result} className="flex gap-3 rounded-md border border-hairline bg-cream p-5">
+            <span className="text-caption font-medium text-ink-muted">{i + 1}</span>
+            <span className="text-ui text-ink">{result}</span>
           </li>
         ))}
       </ol>
 
-      <div className="mt-8 rounded-md border border-hairline bg-canvas p-6">
+      <div className="mt-8 rounded-md border border-hairline bg-cream p-6">
         <dl className="grid gap-4 sm:grid-cols-3">
           {FIELD_VALUES.map((item) => (
             <div key={item.label}>
-              <dt className="text-[13px] text-muted-ink">{item.label}</dt>
-              <dd className="mt-1 text-[15px] text-ink">{item.value}</dd>
+              <dt className="text-caption text-ink-muted">{item.label}</dt>
+              <dd className="mt-1 text-body text-ink">{item.value}</dd>
             </div>
           ))}
         </dl>
-        <p className="mt-4 text-[12px] text-muted-ink">
+        <p className="mt-4 text-caption text-ink-muted">
           Published field values. Source: the problem statement and Oil India
           field reports.
         </p>

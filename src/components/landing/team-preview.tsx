@@ -21,17 +21,12 @@ export function TeamPreview() {
               shape="round"
               className="size-[72px] text-base"
             />
-            <span className="mt-3 text-[13px] font-medium text-ink">
-              {member.name}
-            </span>
+            <span className="mt-3 text-caption font-medium text-ink">{member.name}</span>
           </li>
         ))}
       </ul>
 
-      <Link
-        href="/team"
-        className="mt-8 inline-flex items-center gap-2 rounded-sm text-[14px] font-medium text-link outline-none focus-visible:ring-2 focus-visible:ring-link focus-visible:ring-offset-2"
-      >
+      <Link href="/team" className="mt-8 inline-flex items-center gap-2 rounded-sm text-ui font-medium text-green">
         Meet the team
         <ArrowRight className="size-4" aria-hidden="true" />
       </Link>

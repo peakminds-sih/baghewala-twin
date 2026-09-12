@@ -25,22 +25,19 @@ export function Problem() {
 
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {BLOCKS.map((block) => (
-          <div
-            key={block.title}
-            className="rounded-md border border-hairline bg-canvas p-6"
-          >
-            <h3 className="text-[16px] font-medium text-ink">{block.title}</h3>
-            <p className="mt-3 text-[14px] text-body-text">{block.body}</p>
+          <div key={block.title} className="rounded-md border border-hairline bg-cream p-6">
+            <h3 className="text-h4 font-semibold text-ink">{block.title}</h3>
+            <p className="mt-3 text-ui text-ink">{block.body}</p>
           </div>
         ))}
       </div>
 
-      <blockquote className="mt-8 rounded-md border border-hairline bg-canvas p-6">
-        <p className="text-[16px] text-ink">
+      <blockquote className="mt-8 rounded-md border border-hairline bg-cream p-6">
+        <p className="text-body text-ink">
           &ldquo;CSS cycle design and SRP operation are optimised separately,
           using historical experience.&rdquo;
         </p>
-        <footer className="mt-2 text-[13px] text-muted-ink">
+        <footer className="mt-2 text-caption text-ink-muted">
           From the problem statement.
         </footer>
       </blockquote>

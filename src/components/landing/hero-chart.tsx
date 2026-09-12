@@ -1,25 +1,44 @@
 // The one animation on the site. Static SVG; the line draw and the shade
 // fade-in run once on load through CSS classes in globals.css. Those classes
 // hold the final state under prefers-reduced-motion and below 768px.
+//
+// The data is the worked case from the physics module (src/lib/physics),
+// computed at build time; no model number is typed here. Colours come from CSS
+// variables, so the chart follows the theme (DESIGN.md §6.1). Oil viscosity is
+// ink and the maximum safe pump speed is green ("main", DESIGN.md §6.2). The
+// days after the safe-speed limit starts to bind are marked in gold.
+
+import { DEFAULT_PARAMS, REFERENCE_CASE, simulateCycle } from "@/lib/physics";
+import { formatNumber } from "@/lib/format";
 
 const X0 = 54;
 const X1 = 626;
 const Y0 = 28;
 const Y1 = 336;
 
-const DAYS = [0, 30, 60, 90, 120];
-const VISCOSITY = [5, 93, 1148, 4465, 11500]; // cP
-const PUMP_SPEED = [12, 12, 12, 11.5, 4.5]; // SPM
+const cycle = simulateCycle(REFERENCE_CASE);
+const production = cycle.days.filter((d) => d.phase === "production");
+const first = production[0];
+const last = production[production.length - 1];
+const LAST_DAY = last.phaseDay;
+const BIND_DAY = Math.min(cycle.summary.limitBindsDay ?? LAST_DAY, LAST_DAY);
+const DAY_TICKS = Array.from({ length: Math.floor(LAST_DAY / 30) + 1 }, (_, i) => i * 30);
 
 const LOG_MAX = Math.log10(20000);
 const PUMP_MAX = 15;
 
-const xPos = (day: number) => X0 + (day / 120) * (X1 - X0);
+const xPos = (day: number) => X0 + (day / LAST_DAY) * (X1 - X0);
 const yViscosity = (v: number) => Y1 - (Math.log10(v) / LOG_MAX) * (Y1 - Y0);
 const yPump = (s: number) => Y1 - (s / PUMP_MAX) * (Y1 - Y0);
 
-const line = (values: number[], scale: (n: number) => number) =>
-  DAYS.map((day, i) => `${xPos(day).toFixed(1)},${scale(values[i]).toFixed(1)}`).join(" ");
+const line = (value: (day: (typeof production)[number]) => number, scale: (n: number) => number) =>
+  production.map((d) => `${xPos(d.phaseDay).toFixed(1)},${scale(value(d)).toFixed(1)}`).join(" ");
+
+const ARIA_LABEL =
+  `Line chart of the worked case. After the steam cycle, oil viscosity rises from ${formatNumber(first.inferred.viscosityCp, 1)} ` +
+  `to ${formatNumber(last.inferred.viscosityCp)} centipoise over ${LAST_DAY} days, on a log scale. The maximum safe pump speed ` +
+  `holds at ${formatNumber(DEFAULT_PARAMS.mechanicalMaxSPM)} strokes per minute until day ${formatNumber(BIND_DAY, 1)}, then falls ` +
+  `to ${formatNumber(last.inferred.safePumpSpeedSPM, 1)} by day ${LAST_DAY}. The chart shades that last stretch as the window nobody monitors.`;
 
 const LEFT_TICKS = [
   { value: 1, label: "1" },
@@ -34,13 +53,13 @@ const RIGHT_TICKS = [0, 5, 10, 15];
 export function HeroChart() {
   return (
     <figure className="w-full">
-      <div className="flex flex-wrap gap-x-6 gap-y-2 text-[12px] text-muted-ink">
+      <div className="flex flex-wrap gap-x-6 gap-y-2 text-caption text-ink-muted">
         <span className="flex items-center gap-2">
           <span className="h-0.5 w-5 bg-ink" aria-hidden="true" />
           Oil viscosity — cP, log scale
         </span>
         <span className="flex items-center gap-2">
-          <span className="h-0.5 w-5 bg-signature-coral" aria-hidden="true" />
+          <span className="h-0.5 w-5 bg-green" aria-hidden="true" />
           Maximum safe pump speed — SPM
         </span>
       </div>
@@ -48,30 +67,17 @@ export function HeroChart() {
       <div className="mt-3 flex justify-center">
         <svg
           viewBox="0 0 680 372"
-          className="w-full max-md:h-[260px] max-md:w-auto"
+          className="w-full max-md:h-[260px]"
           role="img"
-          aria-label="Line chart. As days pass after a steam cycle, oil viscosity rises from 5 to 11,500 centipoise on a log scale. The maximum safe pump speed holds near 12 strokes per minute until day 90, then falls to 4.5 by day 120. The chart shades days 90 to 120 as the window nobody monitors."
+          aria-label={ARIA_LABEL}
         >
           {/* horizontal grid + left axis ticks */}
           {LEFT_TICKS.map((tick) => {
             const y = yViscosity(tick.value);
             return (
               <g key={tick.value}>
-                <line
-                  x1={X0}
-                  x2={X1}
-                  y1={y}
-                  y2={y}
-                  stroke="#dddddd"
-                  strokeWidth="1"
-                />
-                <text
-                  x={X0 - 8}
-                  y={y + 3}
-                  textAnchor="end"
-                  fontSize="10"
-                  fill="#41454d"
-                >
+                <line x1={X0} x2={X1} y1={y} y2={y} stroke="var(--hairline)" strokeWidth="1" />
+                <text x={X0 - 8} y={y + 3} textAnchor="end" fontSize="10" fill="var(--ink-muted)">
                   {tick.label}
                 </text>
               </g>
@@ -86,60 +92,52 @@ export function HeroChart() {
               y={yPump(value) + 3}
               textAnchor="start"
               fontSize="10"
-              fill="#41454d"
+              fill="var(--ink-muted)"
             >
               {value}
             </text>
           ))}
 
           {/* x axis */}
-          <line x1={X0} x2={X1} y1={Y1} y2={Y1} stroke="#9297a0" strokeWidth="1" />
-          {DAYS.map((day) => (
-            <text
-              key={day}
-              x={xPos(day)}
-              y={Y1 + 18}
-              textAnchor="middle"
-              fontSize="10"
-              fill="#41454d"
-            >
+          <line x1={X0} x2={X1} y1={Y1} y2={Y1} stroke="var(--hairline-strong)" strokeWidth="1" />
+          {DAY_TICKS.map((day) => (
+            <text key={day} x={xPos(day)} y={Y1 + 18} textAnchor="middle" fontSize="10" fill="var(--ink-muted)">
               {day}
             </text>
           ))}
-          <text x={(X0 + X1) / 2} y={Y1 + 38} textAnchor="middle" fontSize="10" fill="#41454d">
-            Days after the steam cycle ends
+          <text x={(X0 + X1) / 2} y={Y1 + 32} textAnchor="middle" fontSize="10" fill="var(--ink-muted)">
+            Production day (days after soak ends)
           </text>
 
           {/* axis units */}
-          <text x={X0} y={18} textAnchor="start" fontSize="10" fill="#41454d">
+          <text x={X0} y={18} textAnchor="start" fontSize="10" fill="var(--ink-muted)">
             cP
           </text>
-          <text x={X1} y={18} textAnchor="end" fontSize="10" fill="#41454d">
+          <text x={X1} y={18} textAnchor="end" fontSize="10" fill="var(--ink-muted)">
             SPM
           </text>
 
           {/* shaded window — fades in after the lines draw */}
           <g className="hero-chart-extras">
             <rect
-              x={xPos(90)}
+              x={xPos(BIND_DAY)}
               y={Y0}
-              width={xPos(120) - xPos(90)}
+              width={xPos(LAST_DAY) - xPos(BIND_DAY)}
               height={Y1 - Y0}
-              fill="#aa2d00"
-              fillOpacity="0.1"
+              fill="var(--gold-tint)"
             />
             <text
-              x={(xPos(90) + xPos(120)) / 2}
+              x={(xPos(BIND_DAY) + xPos(LAST_DAY)) / 2}
               y={298}
               textAnchor="middle"
               fontSize="10.5"
               fontWeight="500"
-              fill="#aa2d00"
+              fill="var(--gold-text)"
             >
-              <tspan x={(xPos(90) + xPos(120)) / 2} dy="0">
+              <tspan x={(xPos(BIND_DAY) + xPos(LAST_DAY)) / 2} dy="0">
                 The window
               </tspan>
-              <tspan x={(xPos(90) + xPos(120)) / 2} dy="13">
+              <tspan x={(xPos(BIND_DAY) + xPos(LAST_DAY)) / 2} dy="13">
                 nobody monitors.
               </tspan>
             </text>
@@ -148,9 +146,9 @@ export function HeroChart() {
           {/* data lines */}
           <polyline
             className="hero-chart-line"
-            points={line(VISCOSITY, yViscosity)}
+            points={line((d) => d.inferred.viscosityCp, yViscosity)}
             fill="none"
-            stroke="#181d26"
+            stroke="var(--ink)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -158,9 +156,9 @@ export function HeroChart() {
           />
           <polyline
             className="hero-chart-line"
-            points={line(PUMP_SPEED, yPump)}
+            points={line((d) => d.inferred.safePumpSpeedSPM, yPump)}
             fill="none"
-            stroke="#aa2d00"
+            stroke="var(--green)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -169,15 +167,16 @@ export function HeroChart() {
 
           {/* endpoint markers */}
           <g className="hero-chart-extras">
-            <circle cx={xPos(120)} cy={yViscosity(11500)} r="3" fill="#181d26" />
-            <circle cx={xPos(120)} cy={yPump(4.5)} r="3" fill="#aa2d00" />
+            <circle cx={xPos(LAST_DAY)} cy={yViscosity(last.inferred.viscosityCp)} r="3" fill="var(--ink)" />
+            <circle cx={xPos(LAST_DAY)} cy={yPump(last.inferred.safePumpSpeedSPM)} r="3" fill="var(--green)" />
           </g>
         </svg>
       </div>
 
-      <figcaption className="mt-3 text-[12px] text-muted-ink">
-        Values from our reduced-order thermal model. Anchored on the measured
-        viscosity of 11,500 cP at 50 °C.
+      <figcaption className="mt-3 text-caption text-ink-muted">
+        The worked case from the physics model: {formatNumber(REFERENCE_CASE.steamVolumeM3)} m³ of steam, a{" "}
+        {formatNumber(REFERENCE_CASE.strokeM, 1)} m stroke. Viscosity is anchored on {formatNumber(DEFAULT_PARAMS.anchorViscosityCp)} cP at{" "}
+        {formatNumber(DEFAULT_PARAMS.anchorTempC)} °C.
       </figcaption>
     </figure>
   );

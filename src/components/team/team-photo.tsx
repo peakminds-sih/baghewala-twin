@@ -1,15 +1,17 @@
 import type { TeamMember } from "@/lib/data/team";
 import { cn } from "@/lib/utils";
 
-// Initials-fallback colours, all drawn from the DESIGN.md signature palette.
+// Initials-fallback colours. Green and gold fills pair with the token built
+// for them (on-green, on-gold), never a fixed white, so they stay readable
+// when the theme flips (DESIGN.md §8: green and gold turn light in dark mode).
 const FALLBACK: Record<number, string> = {
-  1: "bg-signature-forest text-white",
-  2: "bg-signature-coral text-white",
-  3: "bg-link text-white",
-  4: "bg-signature-mustard text-ink",
-  5: "bg-signature-mint text-ink",
-  6: "bg-signature-peach text-ink",
-  7: "bg-signature-forest text-white",
+  1: "bg-green text-on-green",
+  2: "bg-green text-on-green",
+  3: "bg-green text-on-green",
+  4: "bg-gold text-on-gold",
+  5: "bg-green-tint text-ink",
+  6: "bg-gold-tint text-ink",
+  7: "bg-green text-on-green",
 };
 
 function initials(name: string): string {
@@ -54,7 +56,7 @@ export function TeamPhoto({
       className={cn(
         "flex items-center justify-center font-medium",
         radius,
-        FALLBACK[member.id] ?? "bg-surface-strong text-ink",
+        FALLBACK[member.id] ?? "bg-panel text-ink",
         className
       )}
     >

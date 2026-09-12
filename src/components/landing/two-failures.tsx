@@ -1,9 +1,12 @@
 import { Section, SectionHeading } from "@/components/site/section";
 
-const NEUTRAL = "#9297a0";
-const INK = "#181d26";
-const BLUE = "#1b61c9";
-const CORAL = "#aa2d00";
+// The chart palette (DESIGN.md §6.2): only green, gold and ink carry a
+// series. Green is the oil-rate branch (a model output). Gold is the
+// pump-safety branch (the attention colour, tied to the floating-risk limit).
+const NEUTRAL = "var(--hairline-strong)";
+const INK = "var(--ink)";
+const GREEN = "var(--green)";
+const GOLD = "var(--gold)";
 
 type BoxProps = {
   x: number;
@@ -25,7 +28,7 @@ function Box({ x, y, w, h, lines, color = INK }: BoxProps) {
         width={w}
         height={h}
         rx={6}
-        fill="#ffffff"
+        fill="var(--panel-raised)"
         stroke={color}
         strokeWidth="1.5"
       />
@@ -43,22 +46,20 @@ function Box({ x, y, w, h, lines, color = INK }: BoxProps) {
 // Mobile node — one bordered box in the vertical chain.
 function Node({
   children,
-  color = "border-border-strong",
+  color = "border-hairline-strong",
 }: {
   children: React.ReactNode;
   color?: string;
 }) {
   return (
-    <div
-      className={`rounded-sm border ${color} bg-canvas px-4 py-2.5 text-center text-[13px] text-ink`}
-    >
+    <div className={`rounded-sm border ${color} bg-cream px-4 py-2.5 text-center text-ui text-ink`}>
       {children}
     </div>
   );
 }
 
 function Arrow() {
-  return <div className="text-center text-[14px] leading-none text-border-strong">↓</div>;
+  return <div className="text-center text-ui leading-none text-ink-muted">↓</div>;
 }
 
 export function TwoFailures() {
@@ -77,8 +78,8 @@ export function TwoFailures() {
           <defs>
             {[
               ["arrow-neutral", NEUTRAL],
-              ["arrow-blue", BLUE],
-              ["arrow-coral", CORAL],
+              ["arrow-green", GREEN],
+              ["arrow-gold", GOLD],
             ].map(([id, color]) => (
               <marker
                 key={id}
@@ -108,30 +109,30 @@ export function TwoFailures() {
           {/* split bus from viscosity */}
           <line x1={799} y1={68} x2={799} y2={92} stroke={NEUTRAL} strokeWidth="1.5" />
           <line x1={250} y1={92} x2={799} y2={92} stroke={NEUTRAL} strokeWidth="1.5" />
-          <line x1={250} y1={92} x2={250} y2={110} stroke={BLUE} strokeWidth="1.5" markerEnd="url(#arrow-blue)" />
-          <line x1={660} y1={92} x2={660} y2={110} stroke={CORAL} strokeWidth="1.5" markerEnd="url(#arrow-coral)" />
+          <line x1={250} y1={92} x2={250} y2={110} stroke={GREEN} strokeWidth="1.5" markerEnd="url(#arrow-green)" />
+          <line x1={660} y1={92} x2={660} y2={110} stroke={GOLD} strokeWidth="1.5" markerEnd="url(#arrow-gold)" />
 
           {/* left branch — oil rate */}
-          <Box x={145} y={112} w={210} h={40} lines={["mobility → productivity"]} color={BLUE} />
-          <line x1={250} y1={152} x2={250} y2={174} stroke={BLUE} strokeWidth="1.5" markerEnd="url(#arrow-blue)" />
-          <Box x={145} y={176} w={210} h={40} lines={["inflow → oil rate"]} color={BLUE} />
+          <Box x={145} y={112} w={210} h={40} lines={["mobility → productivity"]} color={GREEN} />
+          <line x1={250} y1={152} x2={250} y2={174} stroke={GREEN} strokeWidth="1.5" markerEnd="url(#arrow-green)" />
+          <Box x={145} y={176} w={210} h={40} lines={["inflow → oil rate"]} color={GREEN} />
 
           {/* right branch — pump safety */}
-          <Box x={555} y={112} w={210} h={40} lines={["rod damping"]} color={CORAL} />
-          <line x1={660} y1={152} x2={660} y2={174} stroke={CORAL} strokeWidth="1.5" markerEnd="url(#arrow-coral)" />
-          <Box x={555} y={176} w={210} h={40} lines={["maximum safe", "pump speed"]} color={CORAL} />
+          <Box x={555} y={112} w={210} h={40} lines={["rod damping"]} color={GOLD} />
+          <line x1={660} y1={152} x2={660} y2={174} stroke={GOLD} strokeWidth="1.5" markerEnd="url(#arrow-gold)" />
+          <Box x={555} y={176} w={210} h={40} lines={["maximum safe", "pump speed"]} color={GOLD} />
 
           {/* converge to SOR */}
-          <line x1={250} y1={216} x2={250} y2={240} stroke={BLUE} strokeWidth="1.5" />
-          <line x1={660} y1={216} x2={660} y2={240} stroke={CORAL} strokeWidth="1.5" />
+          <line x1={250} y1={216} x2={250} y2={240} stroke={GREEN} strokeWidth="1.5" />
+          <line x1={660} y1={216} x2={660} y2={240} stroke={GOLD} strokeWidth="1.5" />
           <line x1={250} y1={240} x2={660} y2={240} stroke={NEUTRAL} strokeWidth="1.5" />
           <line x1={455} y1={240} x2={455} y2={262} stroke={NEUTRAL} strokeWidth="1.5" markerEnd="url(#arrow-neutral)" />
           <Box x={345} y={264} w={220} h={44} lines={["steam-oil ratio (SOR)"]} color={INK} />
         </svg>
 
-        <p className="mt-4 text-[12px] text-muted-ink">
-          <span style={{ color: BLUE }}>Blue</span> is the oil-rate branch.{" "}
-          <span style={{ color: CORAL }}>Coral</span> is the pump-safety branch.
+        <p className="mt-4 text-caption text-ink-muted">
+          <span className="text-green">Green</span> is the oil-rate branch.{" "}
+          <span className="text-gold-text">Gold</span> is the pump-safety branch.
         </p>
       </div>
 
@@ -146,28 +147,20 @@ export function TwoFailures() {
         <Node color="border-ink">viscosity</Node>
         <Arrow />
         <div className="flex flex-col gap-2 border-l-2 border-hairline pl-4">
-          <div className="border-l-2 border-link pl-3">
-            <p className="mb-1 text-[11px] font-medium text-link">
-              Oil-rate branch
-            </p>
-            <Node color="border-link">
-              mobility → productivity → inflow → oil rate
-            </Node>
+          <div className="border-l-2 border-green pl-3">
+            <p className="mb-1 text-caption font-medium text-green">Oil-rate branch</p>
+            <Node color="border-green">mobility → productivity → inflow → oil rate</Node>
           </div>
-          <div className="border-l-2 border-signature-coral pl-3">
-            <p className="mb-1 text-[11px] font-medium text-signature-coral">
-              Pump-safety branch
-            </p>
-            <Node color="border-signature-coral">
-              rod damping → maximum safe pump speed
-            </Node>
+          <div className="border-l-2 border-gold pl-3">
+            <p className="mb-1 text-caption font-medium text-gold-text">Pump-safety branch</p>
+            <Node color="border-gold">rod damping → maximum safe pump speed</Node>
           </div>
         </div>
         <Arrow />
         <Node color="border-ink">steam-oil ratio (SOR)</Node>
       </div>
 
-      <div className="mt-12 max-w-2xl space-y-5 text-[14px] text-ink">
+      <div className="mt-12 max-w-2xl space-y-5 text-ui text-ink">
         <p>
           Oil production and pump safety are not two problems that share a well.
           They are two results of one variable. If you optimise them separately,
