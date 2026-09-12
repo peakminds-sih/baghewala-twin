@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/site/navbar";
 import { Footer } from "@/components/site/footer";
+import { MotionProvider } from "@/components/site/motion-provider";
+import { THEME_SCRIPT } from "@/components/site/theme-script";
 
-// DESIGN.md runs on Haas Grotesk / Inter Display; Inter is the documented
-// open-source substitute for the editorial system.
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+// DESIGN.md §3.1: Source Serif 4 for headings and equations, Inter for the
+// interface and numbers, Geist Mono for code.
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+  variable: "--font-source-serif",
+});
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
   title: {
@@ -23,12 +31,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={cn("h-full antialiased font-sans", inter.variable, geistMono.variable)}
+      suppressHydrationWarning
+      className={cn("h-full antialiased", inter.variable, sourceSerif.variable, geistMono.variable)}
     >
-      <body className="flex min-h-full flex-col bg-canvas">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <head>
+        {/* Sets the theme before first paint. The class it adds is why
+            <html> needs suppressHydrationWarning. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className="flex min-h-full flex-col bg-cream text-ink">
+        <MotionProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </MotionProvider>
       </body>
     </html>
   );
