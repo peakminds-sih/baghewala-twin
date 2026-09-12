@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# rendered intermediates (the errata page is merged into public/documents/research.pdf)
+/docs/build/

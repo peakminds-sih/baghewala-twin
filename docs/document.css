@@ -1,0 +1,454 @@
+/*
+  Shared print stylesheet for the Baghewala project documents.
+  Used by technical-reference.html and field-guide.html.
+  Render to PDF with: npm run docs:pdf
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,500&display=block");
+
+@page {
+  size: A4;
+  margin: 20mm 18mm 20mm;
+  background: #fbfaf7;
+
+  /* Each document sets its own running head in an inline @page rule. */
+  @bottom-center {
+    content: counter(page);
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 7.5pt;
+    color: #8a8478;
+  }
+}
+
+@page :first {
+  @top-right { content: none; }
+  @bottom-center { content: none; }
+}
+
+:root {
+  --cream: #fbfaf7;
+  --green: #0e4f47;
+  --gold: #c08319;
+  --ink: #191b1e;
+  --body: #2e3033;
+  --muted: #6b675f;
+  --rule: #e4dfd3;
+  --paper: #ffffff;
+
+  /* Panel tints. Field guide colour code: blue geology, amber thermal,
+     red mechanical, green systems. */
+  --blue: #3f5e86;
+  --blue-tint: #eef2f7;
+  --amber-tint: #faf3e6;
+  --red: #a63d2a;
+  --red-tint: #f8eeeb;
+  --green-tint: #eaf1ef;
+  --stone-tint: #f3f1ec;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 10.5pt; }
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--body);
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+  line-height: 1.6;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  color: var(--green);
+  font-weight: 500;
+  line-height: 1.25;
+  margin: 0;
+}
+
+p { margin: 0 0 0.75em; }
+strong { color: var(--ink); font-weight: 600; }
+em { font-style: italic; }
+sub, sup { line-height: 0; font-size: 0.72em; }
+code, .mono {
+  font-family: "Cascadia Mono", Consolas, "SF Mono", monospace;
+  font-size: 0.9em;
+}
+
+/* ---------- cover ---------- */
+
+.cover {
+  min-height: 250mm;
+  padding-top: 30mm;
+  page-break-after: always;
+  break-after: page;
+}
+.cover .brand {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-style: italic;
+  font-size: 2.1rem;
+  color: var(--gold);
+  margin-bottom: 1.8rem;
+}
+.cover .bar {
+  width: 32mm;
+  height: 3px;
+  background: var(--green);
+  margin-bottom: 1.6rem;
+}
+.cover h1 {
+  font-size: 3rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.2rem;
+}
+.cover .lede {
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--blue);
+  max-width: 34em;
+  margin-bottom: 2.6rem;
+}
+.cover dl { margin: 0; }
+.cover dt {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 1.1rem;
+}
+.cover dd {
+  margin: 0.2rem 0 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.cover .revision {
+  margin-top: 2.4rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--gold);
+  background: var(--amber-tint);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink);
+  max-width: 40em;
+}
+
+/* ---------- sections ---------- */
+
+section { margin-bottom: 1.6rem; }
+section.major { margin-top: 1.4rem; }
+
+.num {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-style: italic;
+  font-size: 1.7rem;
+  color: var(--gold);
+  line-height: 1.1;
+  /* Keep the section numeral on the same page as its heading. */
+  break-after: avoid;
+  page-break-after: avoid;
+}
+h2 {
+  font-size: 1.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1.5px solid var(--green);
+  margin-bottom: 1rem;
+  break-after: avoid;
+}
+h3 {
+  font-size: 1.02rem;
+  color: var(--red);
+  margin: 1.3rem 0 0.5rem;
+  break-after: avoid;
+}
+
+ul.bullets, ol.numbered {
+  margin: 0 0 0.9em;
+  padding-left: 1.3em;
+}
+ul.bullets li, ol.numbered li { margin-bottom: 0.35em; }
+ul.bullets li::marker, ol.numbered li::marker { color: var(--gold); }
+
+/* ---------- definition panels (field guide) ---------- */
+
+.def {
+  border-left: 3px solid var(--green);
+  background: var(--green-tint);
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  break-inside: avoid;
+}
+.def h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; }
+.def p:last-child { margin-bottom: 0; }
+.def.geo { border-left-color: var(--blue); background: var(--blue-tint); }
+.def.geo h4 { color: var(--blue); }
+.def.thermal { border-left-color: var(--gold); background: var(--amber-tint); }
+.def.thermal h4 { color: #9a6812; }
+.def.mech { border-left-color: var(--red); background: var(--red-tint); }
+.def.mech h4 { color: var(--red); }
+.def.sys { border-left-color: var(--green); background: var(--green-tint); }
+
+/* ---------- step list (phases, stroke halves) ---------- */
+
+.steps {
+  border-left: 3px solid var(--rule);
+  padding: 0.2rem 0 0.2rem 1rem;
+  margin: 1rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.88rem;
+  break-inside: avoid;
+}
+.steps h4 { font-size: 0.9rem; font-weight: 600; margin: 0.6rem 0 0.25rem; }
+.steps h4:first-child { margin-top: 0; }
+.steps p { margin: 0 0 0.4rem; }
+.hl-thermal { color: #9a6812; }
+.hl-geo { color: var(--blue); }
+.hl-mech { color: var(--red); }
+
+/* ---------- key/value card ---------- */
+
+.kv {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--green);
+  background: var(--paper);
+  padding: 0.9rem 1.1rem 0.6rem;
+  margin: 1.2rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.88rem;
+  break-inside: avoid;
+}
+.kv h5 {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.kv table { width: 100%; border-collapse: collapse; }
+.kv td { padding: 0.28rem 0; vertical-align: top; }
+.kv td:first-child { width: 42%; color: var(--ink); }
+.kv td:last-child { color: var(--muted); }
+
+/* ---------- callouts ---------- */
+
+.callout-dark {
+  background: var(--green);
+  color: #eef3f1;
+  padding: 1rem 1.2rem;
+  margin: 1.2rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  break-inside: avoid;
+}
+.callout-dark strong, .callout-dark .gold { color: #f0c46a; font-weight: 500; }
+
+.pull {
+  border-left: 3px solid var(--gold);
+  padding: 0.3rem 0 0.3rem 1rem;
+  margin: 1.2rem 0;
+  font-size: 1.12rem;
+  font-style: italic;
+  color: var(--blue);
+}
+
+.pull-strong {
+  border-left: 3px solid var(--gold);
+  padding: 0.3rem 0 0.3rem 1.1rem;
+  margin: 1.2rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--green);
+  line-height: 1.45;
+}
+
+.chain {
+  background: var(--stone-tint);
+  border: 1px solid var(--rule);
+  padding: 1rem 1.2rem;
+  margin: 1.2rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.9;
+  break-inside: avoid;
+}
+.chain.centered { text-align: center; }
+.chain h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; }
+.chain .small { color: var(--muted); font-size: 0.8rem; }
+.chain .strong { color: var(--green); font-weight: 600; }
+.chain .thermal { color: #9a6812; }
+.chain .geo { color: var(--blue); }
+.chain .mech { color: var(--red); }
+
+/* ---------- equation cards (technical reference) ---------- */
+
+.eq {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--gold);
+  background: var(--paper);
+  padding: 0.9rem 1.1rem 0.7rem;
+  margin: 1.1rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  break-inside: avoid;
+}
+.eq h4 {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #9a6812;
+  margin-bottom: 0.7rem;
+}
+.eq .formula {
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+  font-size: 1.22rem;
+  color: var(--ink);
+  text-align: center;
+  margin: 0.4rem 0 0.8rem;
+  line-height: 1.5;
+}
+.eq .formula.small { font-size: 1.02rem; }
+.eq p { margin: 0 0 0.45rem; }
+.eq .tag {
+  font-weight: 600;
+  color: var(--green);
+}
+.eq .worked { color: var(--ink); }
+.eq table.worked-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0 0.6rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.eq table.worked-table th {
+  text-align: right;
+  font-weight: 600;
+  color: var(--green);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.25rem 0.4rem;
+}
+.eq table.worked-table th:first-child,
+.eq table.worked-table td:first-child { text-align: left; }
+.eq table.worked-table td {
+  text-align: right;
+  padding: 0.22rem 0.4rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.formal {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--gold);
+  background: var(--paper);
+  padding: 0.9rem 1.1rem;
+  margin: 1.1rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.85rem;
+  break-inside: avoid;
+}
+.formal h4 {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #9a6812;
+  margin-bottom: 0.5rem;
+}
+.formal .formula {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--ink);
+  text-align: center;
+  margin: 0.4rem 0 0.8rem;
+}
+
+/* ---------- parameter table ---------- */
+
+table.params {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.78rem;
+  margin: 0.8rem 0;
+}
+table.params thead th {
+  background: var(--green);
+  color: #ffffff;
+  font-weight: 500;
+  text-align: left;
+  padding: 0.45rem 0.55rem;
+}
+table.params tbody td {
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+table.params tbody tr:nth-child(odd) td { background: var(--stone-tint); }
+table.params tbody tr:nth-child(even) td { background: var(--paper); }
+table.params tr { break-inside: avoid; }
+table.params td.sym { font-weight: 600; color: var(--green); white-space: nowrap; }
+table.params td.val { color: var(--red); }
+table.params td.tier { font-weight: 600; white-space: nowrap; }
+.tier-a { color: var(--green); }
+.tier-b { color: var(--blue); }
+.tier-d { color: var(--red); }
+.flag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 1px solid var(--red);
+  border-radius: 3px;
+  padding: 0 0.3rem;
+  margin-left: 0.3rem;
+}
+.table-note {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 0.4rem;
+}
+
+/* ---------- open items / warnings ---------- */
+
+.warn {
+  border-left: 3px solid var(--red);
+  background: var(--red-tint);
+  padding: 0.85rem 1.1rem;
+  margin: 1rem 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: #3b2a26;
+  break-inside: avoid;
+}
+.warn h4 { font-size: 0.88rem; font-weight: 600; color: var(--red); margin-bottom: 0.35rem; }
+.warn p:last-child { margin-bottom: 0; }
+
+/* ---------- glossary ---------- */
+
+.glossary {
+  columns: 2;
+  column-gap: 2rem;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+.glossary div { break-inside: avoid; margin-bottom: 0.75rem; }
+.glossary dt { font-weight: 600; color: var(--green); }
+.glossary dd { margin: 0.1rem 0 0; color: var(--muted); }
+
+.page-break { break-before: page; page-break-before: always; }
+.avoid-break { break-inside: avoid; }

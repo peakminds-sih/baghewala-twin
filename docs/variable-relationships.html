@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Variable relationships in the Baghewala twin model</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 17mm 18mm;
+  }
+
+  :root {
+    --ink: #181d26;
+    --body: #333840;
+    --muted: #41454d;
+    --hairline: #dddddd;
+    --forest: #0a2e0e;
+    --coral: #aa2d00;
+    --link: #1b61c9;
+    --soft: #f8fafc;
+    --coral-tint: #fbf1ec;
+    --forest-tint: #eef3ee;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { font-size: 10.5pt; }
+
+  body {
+    margin: 0;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    color: var(--body);
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3 { color: var(--ink); font-weight: 500; }
+
+  p { margin: 0 0 0.7em; }
+
+  a { color: var(--link); text-decoration: none; }
+
+  code, .mono {
+    font-family: "Cascadia Mono", Consolas, "SF Mono", "Roboto Mono", monospace;
+    font-size: 0.9em;
+  }
+
+  /* ---- cover ---- */
+  .cover {
+    padding-top: 8mm;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10mm;
+    margin-bottom: 10mm;
+  }
+  .cover .kicker {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    color: var(--coral);
+    margin-bottom: 1.4rem;
+  }
+  h1 {
+    font-size: 2.15rem;
+    line-height: 1.15;
+    font-weight: 400;
+    margin: 0 0 0.8rem;
+  }
+  .cover .lede {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--forest);
+    max-width: 40em;
+    margin-bottom: 1.8rem;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    font-size: 0.82rem;
+  }
+  .meta dt {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-size: 0.72rem;
+    margin-bottom: 0.2rem;
+  }
+  .meta dd { margin: 0; color: var(--ink); }
+  .cover .revised {
+    margin: 1.4rem 0 0;
+    padding: 0.6rem 0.8rem;
+    border-left: 3px solid var(--coral);
+    background: var(--coral-tint);
+    font-size: 0.8rem;
+    color: var(--ink);
+  }
+
+  /* ---- sections ---- */
+  section { margin-bottom: 9mm; }
+  .num {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    color: var(--forest);
+    font-size: 1.15rem;
+  }
+  h2 {
+    font-size: 1.32rem;
+    font-weight: 500;
+    margin: 0.1rem 0 0.9rem;
+    padding-top: 0.5rem;
+    border-top: 2px solid var(--ink);
+  }
+  h3 {
+    font-size: 1rem;
+    margin: 1.2rem 0 0.4rem;
+  }
+
+  ul { margin: 0 0 0.7em; padding-left: 1.1em; }
+  li { margin-bottom: 0.3em; }
+
+  /* ---- chain diagram ---- */
+  .chain {
+    background: var(--soft);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 1.1rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.9;
+    break-inside: avoid;
+  }
+  .chain .strong { color: var(--forest); font-weight: 600; }
+  .chain .small { color: var(--muted); font-size: 0.82rem; }
+
+  /* ---- relationship cards ---- */
+  .rel {
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0.6rem;
+    break-inside: avoid;
+  }
+  .rel .pair {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+  .rel .pair .arrow { color: var(--coral); margin: 0 0.35em; }
+  .rel .shape {
+    display: inline-block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--forest);
+    background: var(--forest-tint);
+    border-radius: 999px;
+    padding: 0.08rem 0.55rem;
+    margin-left: 0.5em;
+    vertical-align: 1px;
+  }
+  .rel p { margin: 0.35rem 0 0; font-size: 0.9rem; }
+  .rel .src { color: var(--muted); font-size: 0.8rem; }
+
+  /* ---- table ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 0.4rem;
+  }
+  thead th {
+    background: var(--ink);
+    color: #fff;
+    text-align: left;
+    padding: 0.45rem 0.55rem;
+    font-weight: 500;
+  }
+  tbody td {
+    padding: 0.42rem 0.55rem;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+  }
+  tbody tr { break-inside: avoid; }
+  td .dir-up { color: var(--coral); font-weight: 600; }
+  td .dir-down { color: var(--forest); font-weight: 600; }
+
+  /* ---- callouts ---- */
+  .callout {
+    border-left: 3px solid var(--coral);
+    background: var(--coral-tint);
+    border-radius: 4px;
+    padding: 0.8rem 1rem;
+    margin: 0.8rem 0;
+    break-inside: avoid;
+  }
+  .callout.forest {
+    border-left-color: var(--forest);
+    background: var(--forest-tint);
+  }
+  .callout h3 { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .foot {
+    margin-top: 10mm;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--hairline);
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Companion note</div>
+  <h1>Variable relationships<br />in the twin model</h1>
+  <div class="lede">
+    How each input moves each output — the shape of the curve, the direction,
+    and where the leverage is. Read this beside the model explorer and the
+    merged technical reference.
+  </div>
+  <dl class="meta">
+    <div>
+      <dt>Scope</dt>
+      <dd>Qualitative. Shapes and directions, not derivations.</dd>
+    </div>
+    <div>
+      <dt>Source</dt>
+      <dd>Equations 1–8, merged technical reference (SIH26120).</dd>
+    </div>
+    <div>
+      <dt>Use for</dt>
+      <dd>Shared intuition · slider reading · judge Q&amp;A.</dd>
+    </div>
+  </dl>
+  <p class="revised">
+    Revised 12 September 2026 to match the corrected technical reference:
+    the cooling-constant law, the two-zone oil-rate law, the pump-capacity
+    limit, the float-limit timing, the half-life of the temperature excess,
+    and the Walther B spread. All numbers are for the worked case
+    (2,000 m³, quality 0.70, 2.5 m stroke, 6 SPM, 120 production days).
+  </p>
+</div>
+
+<section>
+  <div class="num">One</div>
+  <h2>The chain</h2>
+  <p>
+    The physics runs one way. Steam inputs on the left, the steam–oil ratio on
+    the right. Nothing downstream feeds back upstream in this version.
+  </p>
+  <div class="chain">
+    steam volume + quality + temperature
+    <span class="strong"> → heated zone V<sub>h</sub>, radius r<sub>h</sub> </span>
+    → cooling time constant τ<br />
+    <span class="small">then, for every day of the cycle</span><br />
+    τ + day → <span class="strong">rock temperature T(t)</span> →
+    <span class="strong">oil viscosity μ(t)</span><br />
+    <span class="small">viscosity splits into two consequences</span><br />
+    ↓ mobility → <span class="strong">oil rate q(t)</span>, up to pump capacity &nbsp;&nbsp;|&nbsp;&nbsp;
+    ↑ rod drag → <span class="strong">max safe pump speed N<sub>max</sub>(t)</span><br />
+    <span class="small">both meet at</span><br />
+    <span class="strong">SOR — barrels of steam per barrel of oil</span>
+  </div>
+  <p>
+    The split at viscosity is the point to hold onto. Production and pump
+    safety are not two problems that share a well. They are two results of one
+    number, the reservoir temperature.
+  </p>
+</section>
+
+<section>
+  <div class="num">Two</div>
+  <h2>How to read the shapes</h2>
+  <p>Each relationship below is tagged with one of these shapes.</p>
+  <ul>
+    <li>
+      <strong>Linear</strong> — output changes by the same proportion as the
+      input. Double the input, double the output. A straight line.
+    </li>
+    <li>
+      <strong>Square root</strong> — output grows, but slower and slower. Four
+      times the input gives twice the output. Diminishing returns.
+    </li>
+    <li>
+      <strong>Inverse</strong> — output is one divided by the input. The input
+      goes up, the output comes down. Small inputs give very large outputs.
+    </li>
+    <li>
+      <strong>Exponential decay</strong> — output falls fast at first, then
+      ever more slowly, toward a floor. Set by a time constant.
+    </li>
+    <li>
+      <strong>Double-logarithmic</strong> — steeper than exponential. A small
+      input change produces a very large output change. This is the viscosity
+      curve.
+    </li>
+    <li>
+      <strong>Saturating</strong> — the relationship works up to a limit, then
+      stops. More input past that point does nothing.
+    </li>
+    <li>
+      <strong>Integral</strong> — the output is the running total of the input
+      over time. It only rises; it rises fast when the input is high.
+    </li>
+  </ul>
+</section>
+
+<section>
+  <div class="num">Three</div>
+  <h2>Steam inputs → heated zone and duration</h2>
+
+  <div class="rel">
+    <div class="pair">
+      Steam volume V<sub>s</sub> <span class="arrow">→</span> heated-zone volume
+      V<sub>h</sub> <span class="shape">Linear</span>
+    </div>
+    <p>
+      Directly proportional. Twice the steam heats twice the rock volume, with
+      steam temperature, quality and efficiency held fixed.
+    </p>
+    <p class="src">Equation 1.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Steam volume V<sub>s</sub> <span class="arrow">→</span> heated-zone radius
+      r<sub>h</sub> <span class="shape">Square root</span>
+    </div>
+    <p>
+      The radius grows as the square root of the volume. Four times the steam
+      gives only twice the reach. Volume buys duration more than it buys
+      distance.
+    </p>
+    <p class="src">r<sub>h</sub> = √(V<sub>h</sub> / π h), after equation 1.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Steam volume V<sub>s</sub> <span class="arrow">→</span> cooling constant τ
+      <span class="shape">Square root, then levels off</span>
+    </div>
+    <p>
+      τ follows the heated zone's volume-to-surface ratio. A bigger zone has
+      less cold surface for its size, so it holds heat longer. At first τ
+      rises with the heated-zone radius, and so with the square root of steam
+      volume. As the radius grows past the zone's thickness the gain shrinks,
+      and τ levels off towards 55 days. There is no hard cap. Over
+      500–4,000 m³, τ runs from 21 to 35 days.
+    </p>
+    <p class="src">
+      Equation 2: τ = 55.2 · r<sub>h</sub> / (r<sub>h</sub> + h), with
+      h = 9.92 m; τ = 30 days in the worked case.
+    </p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Steam quality x <span class="arrow">→</span> heated zone and τ
+      <span class="shape">Near-linear</span>
+    </div>
+    <p>
+      Wetter steam carries less latent heat, so it heats less rock. The effect
+      is real but small: across the whole 0.60–0.80 range the injected heat
+      moves by about 17 percent. Same direction as steam volume, weaker.
+    </p>
+    <p class="src">Equation 1, enthalpy term x · L.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Steam temperature T<sub>s</sub> <span class="arrow">→</span> day-zero rock
+      temperature <span class="shape">Linear</span>
+    </div>
+    <p>
+      The temperature the well starts the cycle at moves one-for-one with the
+      steam temperature. This sets how much headroom there is before viscosity
+      climbs.
+    </p>
+    <p class="src">Equation 2, the (T<sub>s</sub> − T<sub>i</sub>) term.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Steam temperature T<sub>s</sub> <span class="arrow">→</span> heated-zone
+      volume and τ <span class="shape">Mild inverse</span>
+    </div>
+    <p>
+      Hotter steam spreads the same energy across a larger temperature gap, so
+      the heated volume is slightly smaller and τ slightly shorter. Roughly a
+      quarter smaller from 200 °C to 300 °C. It pulls against the day-zero
+      benefit above, so raising T<sub>s</sub> helps the early rate and slightly
+      shortens the heat's life.
+    </p>
+    <p class="src">Equation 1, (T<sub>s</sub> − T<sub>i</sub>) in both numerator and denominator.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Thermal efficiency η <span class="arrow">→</span> heated zone and τ
+      <span class="shape">Linear</span>
+    </div>
+    <p>
+      A straight scaling on the heat that actually reaches the rock. It is a
+      calibration factor, not an operating decision, so the model holds it
+      fixed at 0.5.
+    </p>
+    <p class="src">Equation 1.</p>
+  </div>
+</section>
+
+<section>
+  <div class="num">Four</div>
+  <h2>Duration and time → temperature</h2>
+
+  <div class="rel">
+    <div class="pair">
+      Day in the cycle t <span class="arrow">→</span> rock temperature T
+      <span class="shape">Exponential decay</span>
+    </div>
+    <p>
+      Temperature falls fast in the first weeks, then slower, toward the native
+      50 °C. The excess over 50 °C halves every 0.69 τ days — about 21 days
+      when τ = 30.
+    </p>
+    <p class="src">Equation 2: T(t) = T<sub>i</sub> + (T<sub>s</sub> − T<sub>i</sub>) · e<sup>−t/τ</sup>.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Cooling constant τ <span class="arrow">→</span> temperature on a given day
+      <span class="shape">Saturating rise</span>
+    </div>
+    <p>
+      A larger τ stretches the cooling curve to the right, so on any given day
+      the well is warmer. The gain per extra day of τ shrinks as τ grows, and
+      τ itself levels off near 55 days.
+    </p>
+    <p class="src">Equation 2, through the e<sup>−t/τ</sup> term.</p>
+  </div>
+</section>
+
+<section>
+  <div class="num">Five</div>
+  <h2>Temperature → viscosity</h2>
+
+  <div class="rel">
+    <div class="pair">
+      Rock temperature T <span class="arrow">→</span> oil viscosity μ
+      <span class="shape">Double-logarithmic</span>
+    </div>
+    <p>
+      This is the sharpest relationship in the model. As the oil cools,
+      viscosity rises far faster than an exponential. From the worked figures:
+      250 °C gives 5 cP, 77 °C gives about 1,150 cP, 60 °C gives about
+      4,465 cP, and the last 10 °C down to 50 °C multiplies it by 2.6 to
+      11,500 cP. A small late-cycle
+      temperature drop is a large thickening.
+    </p>
+    <p class="src">
+      Equation 3, ASTM D341 / Walther:
+      log<sub>10</sub>(log<sub>10</sub>(ν + 0.7)) = A − B · log<sub>10</sub>(T).
+      Do not approximate it with a plain exponential.
+    </p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Walther slope B <span class="arrow">→</span> viscosity μ
+      <span class="shape">Pivot at 50 °C</span>
+    </div>
+    <p>
+      B is the temperature sensitivity of the oil. The curve is anchored at
+      50 °C, so every B gives the same viscosity there. Away from the anchor
+      the curves for B = 3.2 and B = 3.8 separate. Every spread on this card
+      is measured the same way: the higher of the two viscosities divided by
+      the lower, minus one. The spread is 0% at 50 °C, 41% at 77 °C, 77% at
+      124 °C and 78% at 250 °C. Below the anchor it is 57% at 30 °C. Above
+      50 °C the higher B gives the thinner oil; below 50 °C it gives the
+      thicker oil. The effect on the float limit is small: B from 3.2 to 3.8
+      moves the day the limit binds only from day 86 to day 91.
+    </p>
+    <p class="src">
+      Equation 3. Open item: one reported viscosity range (10,000–13,000 cP
+      at 50 °C), so B = 3.5 is assumed.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="num">Six</div>
+  <h2>Viscosity → the two consequences</h2>
+
+  <div class="rel">
+    <div class="pair">
+      Viscosity μ <span class="arrow">→</span> max safe pump speed N<sub>max</sub>
+      <span class="shape">Inverse, then capped</span>
+    </div>
+    <p>
+      N<sub>max</sub> is one divided by viscosity. Double the viscosity, halve
+      the safe speed. For about the first three months (to day 88 at a 2.5 m
+      stroke) the oil is thin enough that the 12 SPM mechanical ceiling
+      (tier D) is the real limit and N<sub>max</sub> is flat. Then viscosity
+      blows up and the safe speed collapses within weeks.
+    </p>
+    <p class="src">Equation 5: N<sub>max</sub> = K / (μ · S), then limited to 12 SPM.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Stroke length S <span class="arrow">→</span> max safe pump speed N<sub>max</sub>
+      <span class="shape">Inverse</span>
+    </div>
+    <p>
+      A longer stroke means the rod has to fall farther in the same
+      half-stroke time, so the safe speed is lower. Going from a 1 m to a 3 m
+      stroke cuts the viscosity-limited safe speed to a third, and brings the
+      day the limit binds forward from day 169 to day 83.
+    </p>
+    <p class="src">Equation 5, S in the denominator.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Viscosity μ <span class="arrow">→</span> oil rate q
+      <span class="shape">Inverse, naturally capped</span>
+    </div>
+    <p>
+      Thin oil flows more easily, so the rate rises as viscosity falls. The
+      heated zone and the cold rock beyond it resist flow in series. Even when
+      the heated oil is very thin, the cold zone still limits flow, so the
+      rate has a natural ceiling — about 3.2 times the cold rate at a heated
+      radius of 11.8 m. As the zone cools, the rate falls back to the cold rate
+      of 10 bbl/d, not to zero.
+    </p>
+    <p class="src">
+      Equation 4 (Boberg–Lantz, tier D): q<sub>in</sub> = q<sub>cold</sub> ·
+      ln(r<sub>e</sub>/r<sub>w</sub>) / [(μ<sub>h</sub>/μ<sub>c</sub>)·ln(r<sub>h</sub>/r<sub>w</sub>)
+      + ln(r<sub>e</sub>/r<sub>h</sub>)].
+    </p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Heated-zone radius r<sub>h</sub> <span class="arrow">→</span> peak oil
+      rate <span class="shape">Rises, diminishing</span>
+    </div>
+    <p>
+      A bigger heated zone moves more of the flow path into thin oil, so it
+      raises the ceiling on the rate: 2.4 times the cold rate at 5.9 m,
+      3.2 times at 11.8 m, 3.9 times at 16.7 m.
+    </p>
+    <p class="src">Equation 4, the ln(r<sub>e</sub>/r<sub>h</sub>) term.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Pump capacity <span class="arrow">→</span> oil rate q
+      <span class="shape">Minimum (bottleneck)</span>
+    </div>
+    <p>
+      The surface rate is the smaller of reservoir inflow and pump capacity at
+      the set speed. Slowing the pump costs oil only when pump capacity falls
+      below inflow. Late in the cycle inflow is 10–20 bbl/d, while the pump at
+      4.5 SPM can still move about 126 bbl/d, so slowing to the safe speed
+      costs almost nothing.
+    </p>
+    <p class="src">
+      Equation 4: q = min(q<sub>in</sub>, A<sub>p</sub>·S·N·1440·η<sub>v</sub>).
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="num">Seven</div>
+  <h2>Everything → cumulative oil and SOR</h2>
+
+  <div class="rel">
+    <div class="pair">
+      Oil rate q over time <span class="arrow">→</span> cumulative oil N<sub>p</sub>
+      <span class="shape">Integral</span>
+    </div>
+    <p>
+      N<sub>p</sub> is the running total of the daily rate. It climbs fastest
+      early, when the rate is highest, then slows as the rate decays towards
+      the cold rate. Late days still add oil at about the cold rate.
+    </p>
+    <p class="src">N<sub>p</sub> = ∫ q dt over the cycle.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Steam volume V<sub>s</sub> <span class="arrow">→</span> cumulative oil
+      N<sub>p</sub> <span class="shape">Concave</span>
+    </div>
+    <p>
+      More steam keeps the well hot longer and raises its peak rate, so it
+      produces more. But the gain shrinks with every extra cubic metre: the
+      radius grows only as the square root of volume, and τ levels off. Over
+      120 days, 500 m³ gives 2,050 bbl, 2,000 m³ gives 2,950 bbl, and
+      4,000 m³ gives 3,620 bbl.
+    </p>
+    <p class="src">Chain through equations 1–4.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Steam volume V<sub>s</sub> <span class="arrow">→</span> SOR
+      <span class="shape">Rises</span>
+    </div>
+    <p>
+      SOR is steam divided by oil. The steam on top rises linearly with
+      V<sub>s</sub>; the oil underneath rises more slowly. So SOR rises with
+      steam volume across the simulator range: 1.5 at 500 m³, 4.3 at
+      2,000 m³, 6.9 at 4,000 m³. Small volumes look efficient partly because
+      SOR counts the cold oil the well would produce anyway.
+    </p>
+    <p class="src">SOR = steam / N<sub>p</sub>.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Cycle length t<sub>cut</sub> <span class="arrow">→</span> SOR
+      <span class="shape">Keeps falling, more slowly</span>
+    </div>
+    <p>
+      A longer cycle spreads the same steam over more oil, so SOR drops. The
+      drop slows once the heat is gone, but the well still adds oil at about
+      the cold rate, so SOR keeps falling: 6.8 at 60 days, 4.3 at 120, 3.0 at
+      240, 2.3 at 365. This model is single-cycle; it does not price the oil
+      lost by not re-steaming sooner.
+    </p>
+    <p class="src">N<sub>p</sub> = ∫ q dt, longer limit.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Stroke length S <span class="arrow">→</span> SOR
+      <span class="shape">None unless the pump limits</span>
+    </div>
+    <p>
+      Stroke sets pump capacity and the safe speed. With the default settings
+      pump capacity is far above inflow, so stroke does not change SOR. It
+      matters only at low speed and short stroke, where the pump becomes the
+      bottleneck: at 1 m and 2 SPM, SOR rises from 4.3 to 5.2. A longer stroke
+      does bring the float limit earlier.
+    </p>
+    <p class="src">Through equation 4 (pump capacity) and equation 5.</p>
+  </div>
+
+  <div class="rel">
+    <div class="pair">
+      Walther slope B <span class="arrow">→</span> SOR
+      <span class="shape">Mild fall</span>
+    </div>
+    <p>
+      In the default case a higher B keeps the oil thinner through the warm
+      part of the cycle, so the rate is a little higher and SOR is slightly
+      lower: 4.35 at B = 3.2, 4.20 at B = 3.8.
+    </p>
+    <p class="src">Through equation 3 into equation 4.</p>
+  </div>
+</section>
+
+<section>
+  <div class="num">Eight</div>
+  <h2>Master table</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Input → output</th>
+        <th>Shape</th>
+        <th>Direction</th>
+        <th>Strength</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Steam volume → heated-zone volume</td><td>Linear</td><td><span class="dir-up">same ↑</span></td><td>Strong</td></tr>
+      <tr><td>Steam volume → heated-zone radius</td><td>Square root</td><td><span class="dir-up">same ↑</span></td><td>Medium</td></tr>
+      <tr><td>Steam volume → cooling constant τ</td><td>Square root, then levels off</td><td><span class="dir-up">same ↑</span> then flattens</td><td>Strong, then weak</td></tr>
+      <tr><td>Steam quality → heated zone, τ</td><td>Near-linear</td><td><span class="dir-up">same ↑</span></td><td>Weak (~17% span)</td></tr>
+      <tr><td>Steam temperature → day-zero temperature</td><td>Linear</td><td><span class="dir-up">same ↑</span></td><td>Strong</td></tr>
+      <tr><td>Steam temperature → heated-zone volume, τ</td><td>Mild inverse</td><td><span class="dir-down">opposite ↓</span></td><td>Weak</td></tr>
+      <tr><td>Thermal efficiency → heated zone, τ</td><td>Linear</td><td><span class="dir-up">same ↑</span></td><td>Medium (fixed in model)</td></tr>
+      <tr><td>Day in cycle → rock temperature</td><td>Exponential decay</td><td><span class="dir-down">falls ↓</span></td><td>—</td></tr>
+      <tr><td>Cooling constant τ → temperature that day</td><td>Saturating rise</td><td><span class="dir-up">same ↑</span></td><td>Strong early cycle</td></tr>
+      <tr><td>Rock temperature → oil viscosity</td><td>Double-logarithmic</td><td>T <span class="dir-down">↓</span> ⇒ μ <span class="dir-up">↑↑↑</span></td><td>Very strong</td></tr>
+      <tr><td>Walther B → viscosity (warm side)</td><td>Pivot at 50 °C</td><td>B ↑ ⇒ μ <span class="dir-down">↓</span> warm, <span class="dir-up">↑</span> cold</td><td>Moderate on μ, weak on float day</td></tr>
+      <tr><td>Viscosity → max safe pump speed</td><td>Inverse, then 12 SPM cap</td><td>μ <span class="dir-up">↑</span> ⇒ N<sub>max</sub> <span class="dir-down">↓</span></td><td>Very strong late cycle</td></tr>
+      <tr><td>Stroke length → max safe pump speed</td><td>Inverse</td><td>S <span class="dir-up">↑</span> ⇒ N<sub>max</sub> <span class="dir-down">↓</span></td><td>Medium</td></tr>
+      <tr><td>Viscosity → oil rate</td><td>Inverse, naturally capped</td><td>μ <span class="dir-up">↑</span> ⇒ q <span class="dir-down">↓</span></td><td>Strong</td></tr>
+      <tr><td>Heated-zone radius → peak oil rate</td><td>Rises, diminishing</td><td><span class="dir-up">same ↑</span></td><td>Medium</td></tr>
+      <tr><td>Pump capacity → oil rate</td><td>Minimum (bottleneck)</td><td>only when capacity &lt; inflow</td><td>Weak by default</td></tr>
+      <tr><td>Oil rate over time → cumulative oil</td><td>Integral</td><td><span class="dir-up">rises ↑</span>, then slows</td><td>—</td></tr>
+      <tr><td>Steam volume → cumulative oil</td><td>Concave</td><td><span class="dir-up">same ↑</span>, diminishing</td><td>Medium</td></tr>
+      <tr><td>Steam volume → SOR</td><td>Rises</td><td><span class="dir-up">worse ↑</span></td><td>Strong</td></tr>
+      <tr><td>Cycle length → SOR</td><td>Keeps falling, more slowly</td><td><span class="dir-down">better ↓</span></td><td>Medium, then weak</td></tr>
+      <tr><td>Stroke length → SOR</td><td>None unless the pump limits</td><td>—</td><td>None by default</td></tr>
+      <tr><td>Walther B → SOR</td><td>Mild fall</td><td>B <span class="dir-up">↑</span> ⇒ SOR <span class="dir-down">↓</span></td><td>Weak</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <div class="num">Nine</div>
+  <h2>Three non-linearities to remember</h2>
+
+  <div class="callout">
+    <h3>1 · Viscosity versus temperature is not gentle</h3>
+    <p>
+      It is double-logarithmic — steeper than an exponential. A 10 °C drop near
+      reservoir temperature can double or triple the viscosity. This is why the
+      last weeks of a cycle are dangerous and why the model refuses a simple
+      exponential fit.
+    </p>
+  </div>
+
+  <div class="callout">
+    <h3>2 · Steam volume has diminishing returns</h3>
+    <p>
+      Reach grows as the square root of volume, and the cooling constant
+      levels off near 55 days. Each extra cubic metre adds less oil than the
+      one before, while it adds fully to the numerator of SOR.
+    </p>
+  </div>
+
+  <div class="callout">
+    <h3>3 · The lowest SOR is not the most oil</h3>
+    <p>
+      SOR is lowest at small steam volumes, but those settings also produce
+      the least oil. The optimisation is a
+      trade-off, not a single dial. Rod safety enters the same way: running the
+      pump slow forever avoids every failure and produces almost nothing.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="num">Ten</div>
+  <h2>What this model does not capture</h2>
+  <ul>
+    <li>
+      <strong>Reservoir pressure is held constant.</strong> It drives inflow
+      directly but has no depletion or support term yet. The reported
+      116 ksc is itself uncertain (technical reference, open item 3).
+    </li>
+    <li>
+      <strong>The crude is non-Newtonian.</strong> Viscosity depends on shear
+      rate as well as temperature, so pump speed feeds back into the safe pump
+      speed. That loop is not built.
+    </li>
+    <li>
+      <strong>Single cycle only.</strong> The cycle-length relationship does
+      not price the oil lost by re-steaming too late.
+    </li>
+    <li>
+      <strong>The oil-rate and SOR curves are an estimate.</strong> The cold
+      rate of 10 bbl/d is set so the worked example (SOR 4.27) sits inside the
+      reported 3.0–5.2 band; it is not measured. Treat the shapes as sound and
+      the absolute numbers as indicative.
+    </li>
+    <li>
+      <strong>The pump-speed limit is a static force balance.</strong> It
+      ignores rod stretch and fluid load, uses the heated-zone viscosity for
+      the colder oil in the tubing, and compares fall speed with the mean
+      rather than the peak rod speed. So it reads optimistic and needs
+      calibration against failure history.
+    </li>
+  </ul>
+</section>
+
+<div class="foot">
+  Baghewala Digital Twin · SIH26120 · Companion to the merged technical
+  reference. Equations and parameter ranges: sections 4–5 of that document.
+  Model source: <span class="mono">src/lib/physics/</span>, checked against
+  these documents with <span class="mono">npm run verify:physics</span>.
+  Explore the curves at <span class="mono">/simulator</span> and
+  <span class="mono">/research</span>.
+</div>
+
+</body>
+</html>

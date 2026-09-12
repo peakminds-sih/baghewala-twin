@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>One chain, two decisions — SIH26120 merged technical reference</title>
+<link rel="stylesheet" href="document.css" />
+<style>
+  @page {
+    @top-right {
+      content: "SIH26120 · Merged technical reference";
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      font-size: 7.5pt;
+      color: #8a8478;
+    }
+  }
+  @page :first { @top-right { content: none; } }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ cover -->
+<div class="cover">
+  <div class="brand">Merged</div>
+  <div class="bar"></div>
+  <h1>One chain,<br />two decisions</h1>
+  <p class="lede">
+    The combined physics, parameters and objective for the Baghewala digital
+    twin — source for the deck, the simulator, and model training.
+  </p>
+  <dl>
+    <dt>Problem statement</dt>
+    <dd>SIH26120 · Oil India Limited · Software · Smart Automation</dd>
+    <dt>Use for</dt>
+    <dd>Presentation content · Simulator · ML parameter ranges · Judge Q&amp;A</dd>
+    <dt>Open items</dt>
+    <dd>Three, listed in section six</dd>
+  </dl>
+  <div class="revision">
+    <strong>Revised 12 September 2026</strong> after a document review.
+    Oil SG and the Walther constant A are now stated exactly (equation 3).
+    The float-limit timing is corrected (equation 5). Open item 1 is
+    rewritten: the viscosity curves agree at reservoir temperature and spread
+    most at steam temperature, not the other way round. Missing constants are
+    added (equation 1). New tier-D assumptions: the cooling-constant law
+    (equation 2), the production-rate law and pump displacement (equation 4),
+    the injection and soak phases (equation 7) and the measured signals
+    (equation 8). The cumulative-oil definition is corrected. Steam ranges are
+    narrowed to Baghewala field data. Reservoir pressure is flagged as
+    uncertain. The pump-intake equation is corrected. Symbol clashes are
+    removed. An unsupported error figure is removed.
+  </div>
+</div>
+
+<!-- ================================================================ one -->
+<section class="major">
+  <div class="num">One</div>
+  <h2>The problem</h2>
+  <p>
+    Baghewala, Rajasthan. Heavy crude at 14–19° API, roughly 11,500 cP at
+    50 °C (the midpoint of the reported 10,000–13,000 cP), in a reservoir with
+    a native temperature of 46–50 °C. At that thickness it will not flow, and
+    reservoir pressure is too low to push it anyway. Two interventions are
+    mandatory: steam to thin the oil, and a sucker rod pump to lift it.
+  </p>
+  <p>
+    Steam heats the near-wellbore rock. Over the following weeks that heat
+    drains into the surrounding cold formation, viscosity climbs back, and two
+    things degrade at once — less oil reaches the well, and the rod string can
+    no longer fall through the thickening oil on its downstroke. It goes slack,
+    gets shock-loaded on every stroke, and fatigues until it fractures.
+  </p>
+  <p class="pull-strong">
+    Both effects have one cause: reservoir temperature. Steam scheduling and
+    pump operation are currently managed by separate teams on historical
+    practice, so nothing connects them.
+  </p>
+  <p>
+    That disconnect is the problem statement. The deliverable is a
+    well-to-surface digital twin that observes the current state, predicts how
+    it evolves, and prescribes both decisions from the same prediction.
+  </p>
+</section>
+
+<!-- ================================================================ two -->
+<section class="major">
+  <div class="num">Two</div>
+  <h2>The causal chain</h2>
+  <div class="chain centered">
+    <span class="thermal">Steam volume + quality</span> &nbsp;→&nbsp;
+    <span class="strong">heated zone V<sub>h</sub></span> &nbsp;→&nbsp;
+    <span class="strong">temperature T(t)</span> &nbsp;→&nbsp;
+    <span class="strong">viscosity μ</span><br />
+    <span class="small">then splits</span><br />
+    <span class="geo">↓ mobility → productivity J<sub>o</sub> → inflow q<sub>in</sub> → oil rate</span><br />
+    <span class="mech">↑ rod damping → maximum safe pump speed N<sub>max</sub></span><br />
+    <span class="small">both converge on</span><br />
+    <span class="strong">SOR — barrels of steam per barrel of oil</span>
+  </div>
+  <p>
+    The split is the key structural point. Production potential and mechanical
+    safety are not two problems that happen to share a well. They are two
+    consequences of one variable, which is why optimising them separately is
+    guaranteed to be suboptimal.
+  </p>
+  <p>
+    Heated zone volume matters beyond its obvious role: a larger heated zone
+    has proportionally less surface exposed to cold rock, so it cools more
+    slowly. Equation 2 makes this exact — the cooling constant follows the
+    zone's volume-to-surface ratio. Steam volume therefore buys
+    <em>duration</em>, not just temperature. This is the physical variable
+    through which "inject more now" versus "wait" becomes computable rather
+    than habitual.
+  </p>
+</section>
+
+<!-- ================================================================ three -->
+<section class="major">
+  <div class="num">Three</div>
+  <h2>The objective</h2>
+  <p class="pull-strong">
+    Maximise oil produced per unit of steam injected, subject to pump speed
+    staying below the rod-floating limit.
+  </p>
+  <p>Stated formally, over a cycle:</p>
+  <div class="formal">
+    <h4>Objective function</h4>
+    <div class="formula">
+      min &nbsp; SOR = V<sub>steam</sub> / N<sub>p</sub>
+      &nbsp;&nbsp;&nbsp; subject to &nbsp;&nbsp;&nbsp;
+      N(t) ≤ N<sub>max</sub>(μ(t))
+    </div>
+    <p>
+      <strong>Decision variables:</strong> steam volume V<sub>s</sub>, soak
+      time t<sub>soak</sub>, re-steam date t<sub>cut</sub>, and pump speed N(t)
+      each day.
+    </p>
+    <p>
+      <strong>N<sub>p</sub></strong> = cumulative oil over the cycle,
+      N<sub>p</sub> = ∫ min(q<sub>in</sub>, Q<sub>pump</sub>) dt, where
+      Q<sub>pump</sub> is the pump displacement at the set speed (equation 4).
+      Do not multiply q<sub>in</sub> by fillage: low fillage is the result of
+      low inflow, so that counts the same limit twice. SOR uses total
+      N<sub>p</sub>, which includes the oil the well would give cold.
+    </p>
+  </div>
+  <p>Two consequences worth stating explicitly in the deck.</p>
+  <p>
+    <strong>Rod safety is a constraint, not the goal.</strong> If avoiding
+    failures were the objective, the optimum would be to run at minimum speed
+    forever — no failures, almost no oil. Failures matter because they halt
+    production and incur workover cost. The value of knowing N<sub>max</sub>
+    precisely is that it lets the pump run <em>close</em> to the limit rather
+    than conservatively far below it.
+  </p>
+  <p>
+    <strong>Re-steam timing moves SOR more than pump speed does.</strong> Pump
+    speed is a daily optimisation within a cycle. Re-steam timing is the
+    cycle-level decision, and it directly sets the numerator of SOR. Too early
+    wastes steam on a well still producing; too late means weeks of crawling
+    output at 4 SPM.
+  </p>
+</section>
+
+<!-- ================================================================ four -->
+<section class="major">
+  <div class="num">Four</div>
+  <h2>Equations</h2>
+
+  <!-- ---------------------------------------------------------- eq 1 -->
+  <div class="eq">
+    <h4>1 · Steam → heated zone &nbsp;[Assumption — reduced-order energy balance]</h4>
+    <div class="formula">
+      V<sub>h</sub> = η · m<sub>s</sub> · [ x·L + c<sub>p</sub>(T<sub>s</sub> − T<sub>i</sub>) ] / [ M<sub>R</sub>(T<sub>s</sub> − T<sub>i</sub>) ]
+    </div>
+    <p>
+      Steam enthalpy divided by rock heat requirement gives heated rock volume.
+      Radius r<sub>h</sub> = √(V<sub>h</sub> / πh).
+    </p>
+    <p>
+      <span class="tag">Constants:</span> m<sub>s</sub> = ρ<sub>w</sub>·V<sub>s</sub>
+      with ρ<sub>w</sub> = 1,000 kg/m³, because V<sub>s</sub> is a
+      cold-water-equivalent volume. L = 1,716.6 kJ/kg, the latent heat of
+      steam at 250 °C. c<sub>p</sub> = 4.187 kJ/(kg·K).
+      M<sub>R</sub> = 2,350 kJ/(m³·K). T<sub>i</sub> = 50 °C.
+      h = 9.92 m net heated thickness (tier D: back-solved from the worked
+      radius; replace with field net pay).
+    </p>
+    <p>
+      <span class="tag">T<sub>s</sub> = 250 °C</span> is an effective downhole
+      value (tier D). Field surface steam is 280–305 °C; the downhole
+      temperature after wellbore losses is not reported. L is held at its
+      250 °C value.
+    </p>
+    <p class="worked">
+      <strong>Worked:</strong> 2,000 m³ CWE, x = 0.70, T<sub>s</sub> = 250 °C,
+      T<sub>i</sub> = 50 °C gives 2,039 kJ/kg. With η = 0.5:
+      <strong>V<sub>h</sub> = 4,338 m³, r<sub>h</sub> = 11.8 m</strong>.
+    </p>
+    <p>
+      <strong>Feeds:</strong> equation 2, through the heated radius
+      r<sub>h</sub> that sets the cooling constant τ; and equation 4, through
+      r<sub>h</sub> in the two-zone rate law.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- eq 2 -->
+  <div class="eq">
+    <h4>2 · Thermal balance → temperature &nbsp;[Physics; cooling law is an assumption]</h4>
+    <div class="formula">
+      C<sub>eff</sub> · dT<sub>r</sub>/dt = Q̇<sub>steam</sub> − Q̇<sub>loss</sub> − Q̇<sub>prod</sub>
+    </div>
+    <p>
+      General form, valid during injection, soak and production. For the
+      production phase with steam off and loss proportional to the temperature
+      gap (heat carried out by the produced fluid is folded into the loss
+      term), this integrates to a closed form usable directly in a dashboard:
+    </p>
+    <div class="formula small">
+      T(t) = T<sub>i</sub> + (T<sub>s</sub> − T<sub>i</sub>)·e<sup>−t/τ</sup>
+      &nbsp;&nbsp; where τ = C<sub>eff</sub>/U<sub>eff</sub>
+    </div>
+    <p>
+      <span class="tag">Cooling-constant law [assumption, tier D]:</span>
+      τ is proportional to the heated zone's volume-to-surface ratio. For a
+      cylinder of radius r<sub>h</sub> and height h that ratio is
+      r<sub>h</sub>·h / 2(r<sub>h</sub> + h), so
+    </p>
+    <div class="formula small">
+      τ = τ<sub>∞</sub> · r<sub>h</sub> / (r<sub>h</sub> + h),
+      &nbsp;&nbsp; τ<sub>∞</sub> = 30 · (r<sub>h,ref</sub> + h) / r<sub>h,ref</sub> = 55.2 days
+    </div>
+    <p>
+      r<sub>h,ref</sub> = 11.80 m is the worked radius, so τ = 30 days exactly
+      in the worked case. τ rises with steam volume and levels off towards
+      55 days; there is no hard cap. Over the simulator range
+      (500–4,000 m³) τ runs from 21 to 35 days.
+    </p>
+    <p class="worked">
+      <strong>Worked</strong> (τ = 30 d; t is the production day, and day 0 is
+      the first day after soak): day 0 → 250 °C · day 30 → 124 °C ·
+      day 60 → 77 °C · day 90 → 60 °C.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- eq 3 -->
+  <div class="eq">
+    <h4>3 · Temperature → viscosity &nbsp;[Physics — ASTM D341 / Walther, one constant calibrated]</h4>
+    <div class="formula">
+      log<sub>10</sub>( log<sub>10</sub>(ν + 0.7) ) = A − B · log<sub>10</sub>(T)
+    </div>
+    <p>
+      T in kelvin, ν in cSt, μ (cP) = ν × SG with
+      <strong>SG = 0.963</strong> (from ρ<sub>o</sub> = 963 kg/m³; about
+      15.4 °API, inside the field range). Anchored on 11,500 cP at 50 °C —
+      the midpoint of the reported 10,000–13,000 cP, not a single
+      measurement — with B = 3.5.
+    </p>
+    <p>
+      <strong>A is computed from the anchor and not rounded:</strong>
+      A = log<sub>10</sub>(log<sub>10</sub>(11,500/0.963 + 0.7)) +
+      3.5·log<sub>10</sub>(323.15) = <strong>9.3933</strong>. Rounding A to
+      9.394 gives 11,684 cP at the anchor, 1.6% high.
+    </p>
+    <p class="worked">
+      <strong>Worked:</strong> day 0 → 5 cP · day 30 → 93 cP ·
+      day 60 → 1,148 cP · day 90 → 4,465 cP · fully cold (50 °C) → 11,500 cP
+    </p>
+    <p>
+      <strong>Do not substitute a simple exponential.</strong> Oil viscosity
+      changes too steeply with temperature for one exponential to hold from
+      50 °C to 250 °C. The double-logarithm form (ASTM D341) is the standard
+      for petroleum liquids.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- eq 4 -->
+  <div class="eq">
+    <h4>4 · Viscosity → production &nbsp;[Physics; rate law and pump constants are assumptions]</h4>
+    <div class="formula">
+      J<sub>o</sub> ∝ k·k<sub>ro</sub> / μ<sub>o</sub>
+      &nbsp;&nbsp; · &nbsp;&nbsp;
+      q<sub>in</sub> = J<sub>o</sub> (P<sub>r</sub> − P<sub>wf</sub>)
+    </div>
+    <p>
+      Thin oil flows more readily, so the productivity index rises as
+      viscosity falls. Inflow is productivity times drawdown.
+    </p>
+    <p>
+      <span class="tag">Rate law [assumption, tier D — Boberg–Lantz two-zone
+      radial flow]:</span> the heated zone (r<sub>w</sub> to r<sub>h</sub>,
+      viscosity μ<sub>h</sub>(t)) and the cold zone (r<sub>h</sub> to
+      r<sub>e</sub>, viscosity μ<sub>c</sub>) resist flow in series. Drawdown
+      is held constant in v1.
+    </p>
+    <div class="formula small">
+      q<sub>in</sub>(t) = q<sub>cold</sub> · ln(r<sub>e</sub>/r<sub>w</sub>) /
+      [ (μ<sub>h</sub>(t)/μ<sub>c</sub>)·ln(r<sub>h</sub>/r<sub>w</sub>) + ln(r<sub>e</sub>/r<sub>h</sub>) ]
+    </div>
+    <p>
+      r<sub>w</sub> = 0.1 m, r<sub>e</sub> = 100 m, q<sub>cold</sub> = 10 bbl/d
+      (the unstimulated rate per well), μ<sub>c</sub> = μ(T<sub>i</sub>) =
+      11,500 cP, μ<sub>h</sub>(t) from equation 3 at T(t). When the heated
+      oil is thin, the cold zone still limits flow, so the rate has a natural
+      ceiling of q<sub>cold</sub>·ln(r<sub>e</sub>/r<sub>w</sub>)/ln(r<sub>e</sub>/r<sub>h</sub>)
+      = 3.23 × q<sub>cold</sub> at r<sub>h</sub> = 11.8 m. As the zone cools
+      the rate falls back to q<sub>cold</sub>, not to zero. q<sub>cold</sub>
+      is set so the worked case lands inside the reported SOR band.
+    </p>
+    <p>
+      <span class="tag">Pump displacement [assumption, tier D]:</span>
+      Q<sub>pump</sub> = A<sub>p</sub> · S · N · 1440 · η<sub>v</sub> in m³/d
+      (N in strokes per minute, 1,440 minutes per day). Plunger 1.75″
+      (A<sub>p</sub> = 1.552 × 10⁻³ m²), volumetric efficiency
+      η<sub>v</sub> = 0.8, pump setting depth D<sub>p</sub> = 1,100 m. v1 uses
+      the polished-rod stroke S for the plunger stroke.
+    </p>
+    <p>
+      <span class="tag">Surface rate:</span> q = min(q<sub>in</sub>,
+      Q<sub>pump</sub>) at the set speed N. Slowing the pump costs oil only
+      when Q<sub>pump</sub> falls below q<sub>in</sub>.
+    </p>
+    <p class="worked">
+      <strong>Worked</strong> (2,000 m³, x = 0.70, S = 2.5 m, N = 6 SPM):
+      Q<sub>pump</sub> = 168.6 bbl/d, so the reservoir limits the rate all
+      cycle. q = 32.3 bbl/d on day 0 · 31.7 on day 30 · 26.4 on day 60 ·
+      17.3 on day 90 · 12.7 on day 120. Over 120 production days
+      (trapezoidal rule, 1-day steps) N<sub>p</sub> = 2,946 bbl. Steam =
+      2,000/0.159 = 12,579 bbl, so <strong>SOR = 4.27</strong>.
+    </p>
+    <p>
+      <strong>Coupled to the pump by:</strong> pump intake
+      P<sub>intake</sub> = P<sub>casing</sub> + ρ<sub>o</sub>·g·h<sub>above</sub>
+      (casing-head pressure plus the oil column in the annulus above the
+      pump), with P<sub>wf</sub> ≈ P<sub>intake</sub>. Pump discharge
+      P<sub>discharge</sub> = P<sub>wh</sub> + ρ<sub>o</sub>·g·D<sub>p</sub> +
+      ΔP<sub>f</sub> (tubing side; friction adds when flow is upward). v1 does
+      not compute these; it holds drawdown constant (open item 3).
+    </p>
+    <p>
+      <strong>Limitation:</strong> linear productivity index assumed;
+      non-linear Vogel-type inflow at high drawdown is out of scope for v1.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- eq 5 -->
+  <div class="eq">
+    <h4>5 · Viscosity → pump speed limit &nbsp;[Assumption — static force balance, ours, needs calibration]</h4>
+    <div class="formula">
+      N<sub>max</sub> = min( 30·v<sub>f</sub>/S , 12 SPM )
+      &nbsp;&nbsp; where &nbsp;&nbsp;
+      v<sub>f</sub> = (ρ<sub>s</sub> − ρ<sub>o</sub>)·g·d<sub>r</sub>²·ln(d<sub>t</sub>/d<sub>r</sub>) / (8μ)
+    </div>
+    <p>
+      Rod weight against viscous drag gives the fall speed available; the pump
+      allows a half-stroke period of 30/N seconds to complete it. If required
+      exceeds available, the string goes slack. μ is in Pa·s here
+      (1 cP = 0.001 Pa·s). With the table values,
+      N<sub>max</sub> = 128,240 / (μ<sub>cP</sub> · S). The 12 SPM mechanical
+      ceiling is tier D (the top of the N range).
+    </p>
+    <p class="worked">
+      <strong>Worked</strong> (S = 2.5 m): day 0–60 → no binding limit ·
+      day 90 → <strong>11.5 SPM</strong> · fully cold → <strong>4.5 SPM</strong>
+    </p>
+    <p>
+      <strong>Key finding for the deck:</strong> the limit does not bite for
+      about the first three months of a cycle. In the worked case it first
+      falls below 12 SPM on day 88 (60.4 °C, 4,275 cP); across strokes of
+      1–3 m that day ranges from 83 to 169. Then it collapses rapidly. That
+      end-of-cycle window is where the mechanical damage occurs, and it is
+      precisely the period nobody currently monitors.
+    </p>
+    <p>
+      <span class="tag">Floating risk [assumption, tier D]:</span>
+      risk = N / N<sub>max</sub>. Above 1, the set speed exceeds the safe speed
+      and the rods float.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- eq 6 -->
+  <div class="eq">
+    <h4>6 · Rod dynamics and card diagnostics &nbsp;[Physics — lumped, V1]</h4>
+    <div class="formula">
+      M<sub>r</sub>·ẍ + C<sub>r</sub>·ẋ + K<sub>r</sub>·x = F<sub>ext</sub>(t)
+    </div>
+    <p>
+      M<sub>r</sub>, C<sub>r</sub> and K<sub>r</sub> are the rod string's
+      effective mass, damping and stiffness. Generates a predicted dynamometer
+      card. Comparing predicted against observed gives a residual
+      R<sub>card</sub> = D<sub>observed</sub> − D<sub>predicted</sub> used to
+      classify underfill, valve faults, leakage and mechanical anomaly.
+    </p>
+    <p>
+      <strong>Note:</strong> equation 5 answers the floating question
+      analytically without integrating this, so floating detection need not
+      depend on card fidelity. Reserve this model for fault classification,
+      where card <em>shape</em> genuinely carries the signal.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- eq 7 -->
+  <div class="eq">
+    <h4>7 · CSS phases — injection and soak &nbsp;[Assumption, tier D]</h4>
+    <p>
+      Production (equation 2) starts from a fixed state: the heated zone at
+      T<sub>s</sub> with volume V<sub>h</sub>. Injection and soak must end in
+      that state. They are modelled to be plausible, not precise.
+    </p>
+    <p>
+      <span class="tag">Injection length:</span>
+      t<sub>inj</sub> = 1,000·V<sub>s</sub> / (ṁ<sub>s</sub>·24) days with
+      ṁ<sub>s</sub> = 3,100 kg/h (OIL, tier B). 2,000 m³ takes 26.9 days;
+      the field practice of 14–21 days corresponds to 1,040–1,560 m³.
+    </p>
+    <p>
+      <span class="tag">Injection temperature:</span>
+      T(t) = T<sub>i</sub> + (T<sub>s</sub> − T<sub>i</sub>)(1 − e<sup>−t/τ<sub>inj</sub></sup>),
+      τ<sub>inj</sub> = 1 day.
+    </p>
+    <p>
+      <span class="tag">Heated volume during injection</span> grows in
+      proportion to injected heat: V(t) = f<sub>inj</sub> · V<sub>h</sub> ·
+      t / t<sub>inj</sub>, with f<sub>inj</sub> = [c<sub>p</sub>(T<sub>s</sub> −
+      T<sub>i</sub>) + f<sub>c</sub>·x·L] / [x·L + c<sub>p</sub>(T<sub>s</sub> −
+      T<sub>i</sub>)] and f<sub>c</sub> = 0.5. This is the sensible heat plus
+      the latent heat of the half of the steam that has condensed by the end
+      of injection. f<sub>inj</sub> = 0.705 in the worked case.
+    </p>
+    <p>
+      <span class="tag">Soak:</span> T holds at T<sub>s</sub> while the
+      remaining steam condenses at saturation temperature, and V grows
+      linearly from f<sub>inj</sub>·V<sub>h</sub> to V<sub>h</sub> by the end
+      of soak.
+    </p>
+    <p>
+      <span class="tag">Production length:</span> 120 days by default
+      (t<sub>cut</sub> range 60–365 days). <span class="tag">Days since
+      steaming</span> = days since injection stopped (soak days plus
+      production days).
+    </p>
+    <p>
+      v1 does not model the soak optimum. Soak time moves the calendar but does
+      not change the production-start state.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- eq 8 -->
+  <div class="eq">
+    <h4>8 · Measured signals &nbsp;[Assumption, tier D]</h4>
+    <p>
+      A later stage infers the hidden state from signals a sensor can read.
+      The forward model must therefore produce those signals.
+    </p>
+    <p>
+      <span class="tag">Measured:</span> wellhead temperature, pump load,
+      flow rate q, set SPM and stroke, days since steaming.
+      <span class="tag">Inferred:</span> reservoir temperature, viscosity,
+      heated-zone size, floating risk.
+    </p>
+    <p><span class="tag">Wellhead temperature</span> (Ramey, 1962):</p>
+    <div class="formula small">
+      T<sub>wh</sub> = T<sub>g,0</sub> + g<sub>G</sub>·A − (T<sub>g,0</sub> +
+      g<sub>G</sub>·D + g<sub>G</sub>·A − T<sub>r</sub>)·e<sup>−D/A</sup>
+    </div>
+    <p>
+      g<sub>G</sub> = (T<sub>i</sub> − T<sub>g,0</sub>)/D, surface temperature
+      T<sub>g,0</sub> = 30 °C, D = 1,150 m, relaxation length A = a·q with
+      a = 20 m per bbl/d. Oil leaves the reservoir at T<sub>r</sub> and cools
+      towards the geotherm as it rises; a low rate cools more. Defined only
+      while producing; no value during injection and soak.
+    </p>
+    <p><span class="tag">Pump load</span> — peak polished-rod load:</p>
+    <div class="formula small">
+      PPRL = W<sub>rb</sub>·(1 + S·N²/1790) + ρ<sub>o</sub>·g·D<sub>p</sub>·A<sub>p</sub>
+      + 2π·μ·v·D<sub>p</sub> / ln(d<sub>t</sub>/d<sub>r</sub>)
+    </div>
+    <p>
+      W<sub>rb</sub> = (ρ<sub>s</sub> − ρ<sub>o</sub>)·g·(πd<sub>r</sub>²/4)·D<sub>p</sub>
+      is the buoyant rod weight (28.8 kN). The second term is the fluid load on
+      the plunger for a pumped-off well (16.1 kN). The third is viscous drag on
+      the rods during the upstroke at the mean speed v = S·N/30 (μ in Pa·s),
+      using the same Couette drag as equation 5. S·N²/1790 is the Mills
+      acceleration factor with S in metres.
+    </p>
+    <p>
+      <span class="tag">Heated-zone size</span> stays at V<sub>h</sub> through
+      production; only its temperature falls.
+    </p>
+  </div>
+
+  <!-- ---------------------------------------------------------- worked -->
+  <div class="eq">
+    <h4>Worked production case — all equations</h4>
+    <p>
+      V<sub>s</sub> = 2,000 m³, x = 0.70, T<sub>s</sub> = 250 °C, S = 2.5 m,
+      N = 6 SPM, all other values from the table in section five. Days are
+      production days. Use this table to verify an implementation.
+    </p>
+    <table class="worked-table">
+      <thead>
+        <tr>
+          <th>Day</th><th>T (°C)</th><th>μ (cP)</th><th>N<sub>max</sub> (SPM)</th>
+          <th>q (bbl/d)</th><th>T<sub>wh</sub> (°C)</th><th>PPRL (kN)</th><th>Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>0</td><td>250.0</td><td>4.8</td><td>12.00</td><td>32.3</td><td>73.0</td><td>46.4</td><td>0.50</td></tr>
+        <tr><td>30</td><td>123.6</td><td>93.1</td><td>12.00</td><td>31.7</td><td>51.3</td><td>46.7</td><td>0.50</td></tr>
+        <tr><td>60</td><td>77.1</td><td>1,148</td><td>12.00</td><td>26.4</td><td>41.2</td><td>50.2</td><td>0.50</td></tr>
+        <tr><td>90</td><td>60.0</td><td>4,465</td><td>11.49</td><td>17.3</td><td>36.2</td><td>61.4</td><td>0.52</td></tr>
+        <tr><td>120</td><td>53.7</td><td>7,998</td><td>6.41</td><td>12.7</td><td>34.4</td><td>73.2</td><td>0.94</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Heated zone 4,338 m³, r<sub>h</sub> = 11.8 m, τ = 30 d, injection
+      26.9 days. N<sub>p</sub> = 2,946 bbl, SOR = 4.27. At N = 6 SPM the rods
+      start to float on production day 127; at N = 8 SPM, on day 106.
+    </p>
+  </div>
+
+  <div class="callout-dark">
+    <strong>Where ML attaches:</strong> Corrected = Physics + ML_residual,
+    applied at the wellbore and dynamometer modules. Physics stays the
+    backbone; models learn the discrepancy rather than replacing the
+    mechanism. Two models fall out — one predicting the temperature decay
+    curve for this well and cycle, one solving the constrained optimisation in
+    section three.
+  </div>
+</section>
+
+<!-- ================================================================ five -->
+<section class="major">
+  <div class="num">Five</div>
+  <h2>Parameters for model training</h2>
+  <p>
+    Confidence tiers — <strong class="tier-a">A</strong> stated in the problem
+    statement, <strong class="tier-b">B</strong> published Oil India or SPE
+    data, <strong class="tier-d">D</strong> our assumption, requires
+    calibration. <strong>std</strong> marks physical constants and steam-table
+    values.
+  </p>
+  <table class="params">
+    <thead>
+      <tr><th>Symbol</th><th>Meaning</th><th>Unit</th><th>Value / range</th><th>Conf.</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="sym">°API</td><td>Crude gravity</td><td>°API</td><td class="val">17–19 (PS) vs 14–17 (field); model uses SG 0.963 ≈ 15.4</td><td class="tier"><span class="tier-a">A</span> / <span class="tier-b">B</span></td></tr>
+      <tr><td class="sym">T<sub>i</sub></td><td>Native reservoir temperature</td><td>°C</td><td class="val">46–48 (PS) vs ~50 BHT (field); model uses 50</td><td class="tier"><span class="tier-a">A</span> / <span class="tier-b">B</span></td></tr>
+      <tr><td class="sym">μ<sub>o</sub></td><td>Viscosity at 50 °C, at 50 s⁻¹</td><td>cP</td><td class="val">10,000–13,000; model anchor 11,500 (midpoint)</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">D</td><td>Well depth, Jodhpur Sandstone</td><td>m</td><td class="val">~1150</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">P<sub>r</sub></td><td>Reservoir pressure</td><td>ksc / MPa</td><td class="val">~116 ksc = 11.4 MPa <span class="flag">Uncertain — confirm</span></td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">φ</td><td>Porosity</td><td>fraction</td><td class="val">&lt; 0.10 <span class="flag">Confirm source</span> — unusually low for this sandstone; no equation uses it</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">V<sub>s</sub></td><td>Steam volume per cycle</td><td>m³ CWE</td><td class="val">Literature 300–12,000; Baghewala field 1,040–1,560 (3,100 kg/h for 14–21 days); simulator 500–4,000, default 2,000</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">ṁ<sub>s</sub></td><td>Steam injection rate</td><td>kg/h</td><td class="val">~3,100</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">t<sub>inj</sub></td><td>Injection period</td><td>days</td><td class="val">14–21 (field); model: V<sub>s</sub>/ṁ<sub>s</sub></td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">x</td><td>Steam quality at wellhead</td><td>fraction</td><td class="val">0.60–0.80 (literature); 0.60–0.70 (field)</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">T<sub>s</sub></td><td>Steam temperature</td><td>°C</td><td class="val">200–300 (literature); 280–305 surface (field); model 250 effective downhole</td><td class="tier"><span class="tier-b">B</span> / <span class="tier-d">D</span></td></tr>
+      <tr><td class="sym">P<sub>inj</sub></td><td>Injection pressure</td><td>MPa</td><td class="val">1–11 (≤1600 psig preferred); field steam 85–97 ksc (8.3–9.5 MPa)</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">t<sub>soak</sub></td><td>Soak time</td><td>days</td><td class="val">3–14 (field: 50–60% of injection time)</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">t<sub>cut</sub></td><td>Production length before re-steam</td><td>days</td><td class="val">60–365; model default 120</td><td class="tier"><span class="tier-b">B</span> / <span class="tier-d">D</span></td></tr>
+      <tr><td class="sym">N</td><td>Pump speed</td><td>SPM</td><td class="val">2–12; 12 is the mechanical ceiling</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">S</td><td>Stroke length</td><td>m</td><td class="val">1.0–3.0</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">SOR</td><td>Steam–oil ratio</td><td>—</td><td class="val">3.0–5.2</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">RF</td><td>Recovery factor</td><td>%</td><td class="val">&lt;20 typical, up to 35</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">q<sub>o</sub></td><td>Field production rate (whole field)</td><td>bbl/day</td><td class="val">~655 (July 2025)</td><td class="tier tier-b">B</td></tr>
+      <tr><td class="sym">ρ<sub>w</sub>, c<sub>p</sub>, L</td><td>Water density, specific heat, latent heat at 250 °C</td><td>kg/m³, kJ/(kg·K), kJ/kg</td><td class="val">1,000 · 4.187 · 1,716.6</td><td class="tier">std</td></tr>
+      <tr><td class="sym">M<sub>R</sub></td><td>Rock volumetric heat capacity</td><td>J/(m³·K)</td><td class="val">2.35×10⁶</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">η</td><td>Thermal efficiency</td><td>fraction</td><td class="val">0.4–0.7; model 0.5</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">h</td><td>Net heated thickness</td><td>m</td><td class="val">9.92 (back-solved from r<sub>h</sub> = 11.8 m)</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">τ</td><td>Cooling time constant</td><td>days</td><td class="val">τ<sub>∞</sub>·r<sub>h</sub>/(r<sub>h</sub>+h), τ<sub>∞</sub> = 55.2; 21–35 over the simulator range</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">τ<sub>inj</sub>, f<sub>c</sub></td><td>Injection heating constant; steam condensed by end of injection</td><td>days, fraction</td><td class="val">1 · 0.5</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">A, B</td><td>Walther constants</td><td>—</td><td class="val">A = 9.3933 (computed from the anchor), B = 3.5</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">ρ<sub>o</sub> / ρ<sub>s</sub></td><td>Oil / steel density</td><td>kg/m³</td><td class="val">963 / 7850 (SG 0.963)</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">d<sub>r</sub> / d<sub>t</sub></td><td>Rod / tubing ID</td><td>m</td><td class="val">0.0222 (⅞″) / 0.062 (2⅞″)</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">r<sub>w</sub> / r<sub>e</sub></td><td>Well radius / drainage radius</td><td>m</td><td class="val">0.1 / 100</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">q<sub>cold</sub></td><td>Unstimulated (cold) rate per well</td><td>bbl/day</td><td class="val">10</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">A<sub>p</sub> / η<sub>v</sub></td><td>Plunger area (1.75″) / volumetric efficiency</td><td>m² / fraction</td><td class="val">1.552×10⁻³ / 0.8</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">D<sub>p</sub></td><td>Pump setting depth</td><td>m</td><td class="val">1,100</td><td class="tier tier-d">D</td></tr>
+      <tr><td class="sym">T<sub>g,0</sub> / a</td><td>Surface temperature / Ramey relaxation constant</td><td>°C / m per bbl/d</td><td class="val">30 / 20</td><td class="tier tier-d">D</td></tr>
+    </tbody>
+  </table>
+  <p class="table-note">
+    Conversions — 1 ksc = 98.07 kPa · 1 bbl = 0.159 m³ · 1 psi = 6.895 kPa ·
+    1 cP = 0.001 Pa·s · ν(cSt) = μ(cP)/SG · SG = 141.5/(131.5+°API) · the model
+    uses SG = 0.963 throughout.
+  </p>
+  <p>
+    <strong>State vector for the twin:</strong> X = [T<sub>r</sub>,
+    V<sub>h</sub>, P<sub>r</sub>, μ<sub>o</sub>, λ<sub>o</sub>, q<sub>in</sub>]
+    with control input u = [V<sub>s</sub>, x, t<sub>soak</sub>, N, S] and
+    uncertainty σ. Every parameter carries value, unit, source, calibration
+    method and confidence.
+  </p>
+  <div class="warn">
+    <h4>On the conflicting values</h4>
+    <p>
+      API gravity and native temperature differ between the problem statement
+      and published field data. Preserve both rather than silently reconciling
+      — but note that the field figures come from Oil India's own technical
+      publications and SPE papers written by the field's operators, while the
+      problem statement is an outreach document. Model with the field values;
+      cite the discrepancy openly if asked. The model uses T<sub>i</sub> =
+      50 °C and SG = 0.963.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ six -->
+<section class="major">
+  <div class="num">Six</div>
+  <h2>Open items</h2>
+
+  <div class="warn">
+    <h4>1 · Second viscosity measurement</h4>
+    <p>
+      One reported value exists: 10,000–13,000 cP at 50 °C, and the model
+      uses the 11,500 cP midpoint. Fitting Walther requires two points, so
+      B = 3.5 is assumed. Because the curve is anchored at 50 °C, every B gives
+      the same viscosity there. The spread between B = 3.2 and B = 3.8 (the
+      higher viscosity divided by the lower, minus one) is 0% at the anchor.
+      It grows in
+      both directions — 57% at 30 °C (B = 3.2 gives 96,700 cP, B = 3.8 gives
+      151,700 cP) and 78% at 250 °C. So the uncertainty is smallest near
+      reservoir temperature, where the well spends most of its life, and
+      largest at steam temperature.
+    </p>
+    <p>
+      Inside the cycle, measured the same way, the spread is 41% at 77 °C and
+      77% at 124 °C. B from 3.2 to 3.8 moves the day the float limit binds only from day
+      86 to day 91, and changes the worked SOR from 4.35 to 4.20. A second
+      measurement, ideally near 100 °C, would fix B and test whether the
+      Walther form holds for this crude.
+    </p>
+  </div>
+
+  <div class="warn">
+    <h4>2 · Calibrate the floating limit against failure history</h4>
+    <p>
+      Equation 5 is a static force balance. It ignores rod stretch, elastic
+      wave effects, plunger fluid load and mechanical friction, so it reads
+      optimistic — real N<sub>max</sub> is lower. Two more reasons it reads
+      optimistic: it uses the heated-zone viscosity for the oil around the
+      rods, but oil cools as it rises up the tubing, so the upper rods sit in
+      thicker oil; and it compares the rod's fall speed with the mean
+      downstroke speed S·N/30, while for near-sinusoidal motion the peak speed
+      is π/2 higher — on that basis the day-90 limit would be 7.3 SPM, not
+      11.5.
+    </p>
+    <p>
+      Oil India states it holds rod failure and pump unsetting history. Fit one
+      correction factor so predicted N<sub>max</sub> aligns with speeds at
+      which failures actually occurred, and present it as calibrated rather
+      than first-principles.
+    </p>
+  </div>
+
+  <div class="warn">
+    <h4>3 · Reservoir pressure has no governing dynamic</h4>
+    <p>
+      P<sub>r</sub> appears in every state vector and drives q<sub>in</sub>
+      directly, but no dP<sub>r</sub>/dt relationship is defined. Either add a
+      simple depletion and support term, or state explicitly that it is held
+      constant or externally supplied for v1, with the reason. v1 answer:
+      P<sub>r</sub> is held constant, and the rate law in equation 4 holds
+      drawdown constant, so P<sub>r</sub> does not enter any worked number.
+    </p>
+    <p>
+      The reported value is also uncertain. 116 ksc at 1,150 m is close to
+      hydrostatic (about 115 ksc), which does not fit the problem statement's
+      "low reservoir pressure". Surface steam at 85–97 ksc could not enter a
+      reservoir at 116 ksc. The figure may be the initial pressure. Confirm it
+      with Oil India before using it; it is not corrected here.
+    </p>
+  </div>
+
+  <div class="callout-dark">
+    <strong>Unmodelled, worth naming to judges:</strong> the crude is
+    non-Newtonian — viscosity is quoted at a shear rate of 50 s⁻¹, so
+    thickness depends on shear as well as temperature. Since rod motion
+    through the fluid <em>is</em> a shear event, pump speed influences
+    viscosity, which influences the safe pump speed. A feedback loop inside
+    equation 5. Acknowledge as a known refinement; do not build it until the
+    main chain works.
+  </div>
+</section>
+
+</body>
+</html>

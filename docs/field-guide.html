@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Baghewala field guide — SIH26120</title>
+<link rel="stylesheet" href="document.css">
+<style>
+@page {
+  @top-right {
+    content: "SIH26120 · Baghewala field guide";
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    font-size: 7.5pt;
+    color: #8a8478;
+  }
+}
+@page :first {
+  @top-right { content: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="brand">Baghewala</div>
+  <div class="bar"></div>
+  <h1>Heavy oil, cold rock,<br>and a pump that keeps breaking</h1>
+  <p class="lede">A working guide to problem statement SIH26120, written for people who have never touched the oil and gas industry.</p>
+  <dl>
+    <dt>Problem statement</dt>
+    <dd>SIH26120 — Digital Twin for Well-to-Surface Optimization of Cyclic Steam Stimulation (CSS) and Sucker Rod Pump (SRP) Operations for Heavy Oil Wells of Baghewala Field</dd>
+    <dt>Organisation</dt>
+    <dd>Oil India Limited</dd>
+    <dt>Category / theme</dt>
+    <dd>Software · Smart Automation</dd>
+    <dt>Prepared for</dt>
+    <dd>Internal team briefing, Smart India Hackathon 2026</dd>
+  </dl>
+  <div class="revision">Revised 12 September 2026. Section Five: the day on which a fixed pump setting becomes destructive is corrected from day forty to about day ninety, to match the float-limit calculation in the technical reference (equation 5).</div>
+</div>
+
+<p>You do not need any petroleum background to work on this. The physics involved is roughly what you already know: things cool down, thick liquids resist movement, and metal breaks when you shock it repeatedly. What follows builds the picture from the ground up, defines every term Oil India uses, and ends with exactly what they are asking us to deliver.</p>
+
+<div class="callout-dark">Definitions appear in coloured panels beside the paragraph that introduces the term. <span class="gold">Blue</span> panels are geology and reservoir terms, <span class="gold">amber</span> are thermal and steam terms, <span class="gold">red</span> are mechanical and failure terms, and <span class="gold">green</span> are systems and software terms. Everything is collected again in the glossary at the end.</div>
+
+<section class="major">
+  <div class="num">One</div>
+  <h2>The field and the crude</h2>
+
+  <p>Baghewala is an oilfield in Rajasthan operated by Oil India Limited. The oil sits in a rock formation called the Jodhpur Sandstone, roughly a kilometre below the surface.</p>
+
+  <p>The crude there is rated at 17–19° API. That number is the single most important fact in the entire problem statement, because everything else follows from it. It tells you the oil is heavy — thick, dense and reluctant to move.</p>
+
+  <div class="def geo">
+    <h4>API gravity</h4>
+    <p>An inverted scale for how dense crude oil is, set by the American Petroleum Institute. Lower number means heavier and thicker oil. Fresh water sits at 10. Light crude that flows easily is 40 and above. Anything below about 22 is classed as heavy crude.</p>
+    <p>At 17–19, Baghewala crude is firmly in heavy territory. Think cold molasses rather than petrol.</p>
+  </div>
+
+  <p>The brief lists five characteristics of the reservoir. Each one makes production harder, and they compound.</p>
+
+  <ul class="bullets">
+    <li><strong>High crude viscosity</strong> — the oil resists flowing</li>
+    <li><strong>High asphaltene content</strong> — the heaviest fraction of the crude is abundant</li>
+    <li><strong>Low reservoir pressure</strong> — nothing is pushing the oil upward</li>
+    <li><strong>Low reservoir temperature, 46–48°C</strong> — the rock is not warm enough to thin the oil</li>
+    <li><strong>Poor oil mobility under primary recovery</strong> — left alone, the oil barely moves at all</li>
+  </ul>
+
+  <div class="def geo">
+    <h4>Viscosity</h4>
+    <p>A liquid's resistance to flowing. Water has low viscosity and pours instantly; honey has high viscosity and takes its time. Measured in centipoise, written cP. Water is about 1 cP at room temperature; heavy crude at reservoir conditions can run into the thousands.</p>
+    <p>Viscosity is strongly temperature-dependent, and that dependence is the mechanism this entire problem statement turns on.</p>
+  </div>
+
+  <div class="def geo">
+    <h4>Reservoir</h4>
+    <p>Not an underground lake. Oil is held inside the pore spaces of porous rock, in this case sandstone, the way water is held in a sponge. Extracting it means persuading it to seep through rock, not pumping it out of a cavern.</p>
+  </div>
+
+  <div class="def geo">
+    <h4>Asphaltene</h4>
+    <p>The heaviest, most complex molecules in crude oil — the tar-like fraction. Asphaltenes stay dissolved under stable conditions but drop out of solution when temperature or pressure shifts, depositing solids that block pore spaces and foul equipment.</p>
+    <p>High asphaltene content means the crude is not just thick but chemically awkward, and reacts badly to being disturbed.</p>
+  </div>
+</section>
+
+<section class="major">
+  <div class="num">Two</div>
+  <h2>Why the oil stays underground</h2>
+
+  <p>In a conventional field, oil arrives at the surface largely on its own. The reservoir is under great pressure from the weight of rock above and from gas dissolved in the oil. Drill into it and that pressure drives the oil up the well, much like opening a shaken bottle of a carbonated drink. This is called primary recovery, and in a good field it can produce for years without any assistance.</p>
+
+  <div class="def geo">
+    <h4>Primary recovery</h4>
+    <p>The first stage of production, relying only on the reservoir's own natural energy — pressure and gas expansion — to drive oil to the surface. No injection, no pumping. It is the cheapest way to produce oil and typically recovers only a modest fraction of what is in the ground.</p>
+  </div>
+
+  <p>At Baghewala, primary recovery fails for two independent reasons, and either would be sufficient on its own. First, reservoir pressure is low, so there is no meaningful push from below. Second, even with pressure, the oil is too viscous to travel through the pore spaces of the rock at any useful rate. The brief calls this <em>poor oil mobility</em>.</p>
+
+  <div class="def geo">
+    <h4>Mobility</h4>
+    <p>How readily a fluid moves through rock. It depends on the rock's permeability and inversely on the fluid's viscosity — thick oil in tight rock has low mobility. Raising temperature lowers viscosity and therefore raises mobility, which is the entire rationale for thermal recovery.</p>
+  </div>
+
+  <p>So Oil India must supply both missing ingredients artificially. They have to make the oil thinner, and they have to lift it mechanically. The brief states this directly: artificial lift and thermal enhanced oil recovery are both critical for sustained production.</p>
+
+  <div class="def thermal">
+    <h4>Enhanced Oil Recovery (EOR)</h4>
+    <p>Any technique that goes beyond natural drive and simple water injection to extract additional oil. Thermal EOR is the branch that uses heat, and it is the standard approach for heavy crude because viscosity responds so strongly to temperature.</p>
+  </div>
+</section>
+
+<section class="major">
+  <div class="num">Three</div>
+  <h2>Making the oil thinner</h2>
+
+  <p>The first half of the operation is heating the reservoir. Oil India does this using Cyclic Steam Stimulation, universally abbreviated CSS and known in the field as the huff-and-puff method. It runs in three phases, repeated indefinitely.</p>
+
+  <div class="steps">
+    <h4>Injection</h4>
+    <p><span class="hl-thermal">High-pressure steam is pumped down the well for days or weeks.</span> Heat spreads outward from the wellbore into the surrounding rock, and the crude in that heated zone thins dramatically.</p>
+    <h4>Soak</h4>
+    <p>The well is shut in and left alone. Nothing happens on the surface, but underground the heat continues to distribute and viscosity keeps falling.</p>
+    <h4>Production</h4>
+    <p>The well is reopened and the now-mobile oil is pumped out. Over the following weeks <span class="hl-geo">the surrounding cold rock draws the heat away</span>, viscosity climbs back, and production declines until the cycle must begin again.</p>
+  </div>
+
+  <div class="def thermal">
+    <h4>Cyclic Steam Stimulation (CSS)</h4>
+    <p>A thermal EOR method in which a single well is used for both steam injection and production, alternating between the two. Distinct from continuous steamflooding, where separate wells inject and produce simultaneously. CSS is cheaper and simpler, but its benefit is temporary by design and must be repeated indefinitely.</p>
+  </div>
+
+  <p>Four parameters define how a CSS cycle is run. These are decisions a reservoir engineer makes, and the brief names all four.</p>
+
+  <div class="kv">
+    <h5>CSS control parameters</h5>
+    <table>
+      <tr><td>Steam volume</td><td>how much steam is injected in this cycle</td></tr>
+      <tr><td>Injection pressure</td><td>how forcefully it is driven into the formation</td></tr>
+      <tr><td>Soak time</td><td>how long the well sits shut before production resumes</td></tr>
+      <tr><td>Production cut-off</td><td>the point at which output has declined enough to justify re-steaming</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="major">
+  <div class="def thermal">
+    <h4>Soak time</h4>
+    <p>The shut-in period between injection and production. Too short and the heat has not spread far enough into the formation, wasting steam. Too long and the reservoir begins cooling before any oil has been produced, wasting the heat that was successfully delivered. There is an optimum, and it shifts with reservoir conditions.</p>
+  </div>
+
+  <div class="def thermal">
+    <h4>Steam–Oil Ratio (SOR)</h4>
+    <p>Barrels of steam injected per barrel of oil produced. Generating steam means burning fuel and treating water, so SOR is effectively the operating cost of thermal recovery expressed as one number. A lower SOR means more oil for the same energy spend.</p>
+    <p>SOR appears in both the problem list and the expected benefits of the brief. Treat it as the primary success metric of anything we build.</p>
+  </div>
+
+  <div class="num">Four</div>
+  <h2>Lifting the oil</h2>
+
+  <p>Thinning the oil is not enough. With reservoir pressure too low to drive anything to the surface, the oil must be lifted mechanically. This is called artificial lift, and Baghewala uses the most common form of it worldwide.</p>
+
+  <div class="def mech">
+    <h4>Artificial lift</h4>
+    <p>Any mechanical system that raises fluid from a well when reservoir pressure alone cannot. Necessary in the great majority of producing wells worldwide once natural drive weakens.</p>
+  </div>
+
+  <p>A Sucker Rod Pump, abbreviated SRP, is the nodding-donkey machine familiar from photographs. A motor drives a counterweighted beam that pivots up and down. From the beam, a continuous string of steel rods runs the full depth of the well to a plunger seated in the pump barrel at the bottom.</p>
+
+  <div class="def mech">
+    <h4>Rod string</h4>
+    <p>The connected series of steel rods, individually around 8 metres long, joined to span the entire depth from surface to pump — often a kilometre or more. It transmits the beam's motion downhole. It is heavy, slender, and works in tension.</p>
+  </div>
+
+  <p>The cycle has two halves, and the asymmetry between them is where the trouble lives.</p>
+
+  <div class="steps">
+    <h4>Upstroke</h4>
+    <p>The beam raises the rod string. The plunger lifts a column of oil toward the surface. The rods are in tension, carrying both the weight of the steel and the weight of the fluid above the plunger. This half is powered.</p>
+    <h4>Downstroke</h4>
+    <p>The beam descends. The rod string must now fall back down <em>under its own weight alone</em>, sinking through the surrounding oil. Nothing pushes it. This half depends entirely on gravity beating the resistance of the fluid.</p>
+  </div>
+</section>
+
+<section class="major">
+  <p>Three parameters control the pump, and unlike the CSS parameters these can be changed at any moment from the surface.</p>
+
+  <div class="kv">
+    <h5>SRP control parameters</h5>
+    <table>
+      <tr><td>Stroke length</td><td>vertical distance the rod travels each cycle</td></tr>
+      <tr><td>Strokes per minute (SPM)</td><td>cycle rate — how often the motion repeats</td></tr>
+      <tr><td>VFD setting</td><td>motor speed, which is how SPM is actually adjusted</td></tr>
+    </table>
+  </div>
+
+  <div class="def sys">
+    <h4>Variable Frequency Drive (VFD)</h4>
+    <p>An electronic controller that varies the frequency of power supplied to the pump motor, and therefore its speed. It is the physical means by which strokes per minute is changed. Its presence matters to us: pump speed <em>can</em> be adjusted continuously and automatically, so a software recommendation has something real to act on.</p>
+  </div>
+
+  <h3>What goes wrong on the downstroke</h3>
+
+  <p>The downstroke assumes the rod string can fall through the surrounding fluid faster than the beam descends. In thin oil this is trivially satisfied. In heavy, cooled crude it is not.</p>
+
+  <p>When the fluid is too viscous, the rods sink too slowly. The beam continues down on schedule while the rod string lags behind it. The connection between them goes slack. This is <strong>rod floating</strong> — the rod is effectively suspended in the fluid rather than hanging under load.</p>
+
+  <div class="def mech">
+    <h4>Rod floating</h4>
+    <p>A condition in which viscous drag prevents the rod string from descending as fast as the surface unit, leaving the rods unsupported and the string momentarily slack. It is a symptom of a mismatch between pump speed and fluid conditions, not a mechanical defect.</p>
+  </div>
+
+  <p>What follows is worse than the slackness itself. When the beam reaches the bottom of its travel and reverses, it catches up with the lagging rod string and jerks it into tension. That sudden shock is <strong>impact loading</strong>, mechanically equivalent to a tow rope going slack and then snapping taut.</p>
+
+  <div class="def mech">
+    <h4>Impact loading</h4>
+    <p>A sudden shock load applied to the rod string when slack is abruptly taken up. Steel tolerates smooth, steady tension well; it tolerates repeated sharp shocks poorly. Each impact does a small amount of fatigue damage, and at several strokes per minute the damage accumulates continuously.</p>
+  </div>
+
+  <p>Two failures follow from sustained impact loading, and the brief names both.</p>
+
+  <div class="def mech">
+    <h4>Rod failure</h4>
+    <p>Fatigue fracture of the rod string, typically at a coupling. Production halts entirely, and a workover crew must pull the entire string from the well to locate and repair the break. Expensive in both direct cost and lost output.</p>
+  </div>
+
+  <div class="def mech">
+    <h4>Pump unsetting</h4>
+    <p>The downhole pump being dislodged from its seated position by irregular loading. The pump ceases to function correctly and requires intervention to reseat, again meaning downtime.</p>
+  </div>
+
+  <p>Both are avoidable. Reducing strokes per minute gives the rod string more time to complete its descent, and floating stops. The difficulty is knowing when to reduce it, and by how much.</p>
+</section>
+
+<section class="major">
+  <div class="num">Five</div>
+  <h2>Where the two halves collide</h2>
+
+  <p>Everything above describes two systems that are, in Oil India's current practice, managed independently. That independence is the actual problem statement.</p>
+
+  <div class="chain">
+    <h4>The physical chain after a steam cycle ends</h4>
+    <p><span class="geo">Reservoir temperature declines</span> as heat dissipates into surrounding rock → crude viscosity rises → the rod string's descent slows → rod floating begins → impact loading accumulates → <span class="mech">rod failure or pump unsetting</span></p>
+  </div>
+
+  <p>The reservoir is changing continuously and predictably. The pump settings are not changing at all. A configuration that is entirely correct on day three after steaming is actively destructive by about day ninety, and nothing in the current process registers the difference.</p>
+
+  <p class="pull">CSS cycle design and SRP operation are optimised separately, using historical experience.</p>
+
+  <p>That single sentence from the brief is what we are being asked to fix. Note the two distinct failures buried in it — the systems are <em>separate</em>, and the decisions are based on <em>experience</em> rather than measurement.</p>
+
+  <p>The cost shows up in two places at once. Mechanically, in broken rods, unseated pumps and maintenance downtime. Economically, in a Steam–Oil Ratio higher than it needs to be, because steam is injected on habitual schedules rather than optimal ones, and because production is lost to avoidable equipment failures.</p>
+</section>
+
+<section class="major">
+  <div class="num">Six</div>
+  <h2>Why Oil India cannot solve this internally</h2>
+
+  <p>Worth understanding, because it tells us what our solution actually has to overcome. The brief lists five current challenges, and each maps to a real organisational or technical gap.</p>
+
+  <h3>The decisions sit with different people</h3>
+  <p>CSS cycles are planned by reservoir engineers working on a timescale of months. Pump settings are handled by production operators working on a timescale of hours. Different teams, different systems, different mental models. Neither has visibility into the other's decisions.</p>
+
+  <h3>Practice is historical rather than analytical</h3>
+  <p>Steam volumes and soak times are set by reference to what worked before on comparable wells. This is not unreasonable, but it cannot adapt to a specific well's current condition and it cannot improve systematically.</p>
+
+  <h3>Pump adjustment is reactive</h3>
+  <p>The brief states that SRP parameters are adjusted manually and reactively. Operators intervene once something looks wrong. By that point the rod string has been floating for weeks and the fatigue damage is already accumulated. The intervention prevents nothing.</p>
+
+  <h3>Nothing predicts</h3>
+  <p>There is no capability to forecast reservoir cooling, viscosity change, production decline or failure risk. Without prediction, every decision is either habitual or reactive, and neither can be optimal.</p>
+
+  <h3>The data exists and is unused</h3>
+  <p>This is the gap we are being brought in to close. Sensors and records already capture temperature, pressure, flow, pump loading, steam parameters and every past failure. It sits in operational systems, unconnected to any decision-making tool. Oil India is not asking us to gather data. They are asking us to turn data they already hold into instructions for tomorrow morning.</p>
+</section>
+
+<section class="major">
+  <div class="num">Seven</div>
+  <h2>What the brief asks us to build</h2>
+
+  <p>The stated deliverable is an AI-enabled Well-to-Surface Digital Twin integrating reservoir, wellbore and surface production systems, providing real-time monitoring, prediction and optimisation.</p>
+
+  <div class="def sys">
+    <h4>Digital twin</h4>
+    <p>A software model of a specific physical asset, continuously updated by that asset's live sensor data, used to monitor its current state, simulate future behaviour and test decisions before applying them.</p>
+    <p>The distinguishing feature is that it tracks one real, identified thing in real time. A generic simulation is not a digital twin; a model bound to Well 7 at Baghewala and updated from Well 7's sensors is.</p>
+  </div>
+
+  <div class="def sys">
+    <h4>Well-to-surface</h4>
+    <p>Spanning the full production chain rather than one component: the reservoir rock, the wellbore running through it, and the surface equipment above. The term is doing real work in the title — integration across all three is precisely what is currently missing.</p>
+  </div>
+
+  <p>The brief then lists six explicit requirements. This is effectively the scoring rubric, and a complete solution addresses every one.</p>
+
+  <ol class="numbered">
+    <li>Optimise CSS cycle parameters</li>
+    <li>Predict reservoir heating, cooling and production performance</li>
+    <li>Continuously optimise SRP operation by adjusting stroke speed and SPM based on well conditions</li>
+    <li>Detect rod floating and minimise impact loading</li>
+    <li>Improve pump efficiency and equipment reliability</li>
+    <li>Optimise steam and energy consumption while reducing operating cost</li>
+  </ol>
+
+  <p>Read together, these describe a system with three functions. It must <strong>observe</strong> the well's current state from live data. It must <strong>predict</strong> how that state evolves — cooling rate, viscosity, production decline, failure risk. And it must <strong>prescribe</strong> concrete settings: what SPM to run today, when to begin the next steam cycle, and with how much steam.</p>
+
+  <p>Requirement three deserves attention. The word is <em>continuously</em>. They are not asking for a monthly report. They are asking for something that keeps pace with a reservoir that changes every day.</p>
+</section>
+
+<section class="major">
+  <div class="num">Eight</div>
+  <h2>The data they say exists</h2>
+
+  <p>The brief closes with a section stating that the field has sufficient historical and operational data, and lists seven categories. No download link is provided on the portal, but this list tells us the schema Oil India expects a solution to work against.</p>
+
+  <div class="kv">
+    <h5>Stated available data</h5>
+    <table>
+      <tr><td>Production history</td><td>output over time, per well</td></tr>
+      <tr><td>CSS cycle records</td><td>when each well was steamed, and how</td></tr>
+      <tr><td>Steam injection parameters</td><td>volume, pressure, duration</td></tr>
+      <tr><td>VFD and SRP operating data</td><td>pump settings and loading over time</td></tr>
+      <tr><td>Rod failure and unsetting history</td><td>when equipment broke, and under what conditions</td></tr>
+      <tr><td>Well completion and reservoir data</td><td>the as-built specification of each well</td></tr>
+      <tr><td>Fluid properties and pressure data</td><td>crude characteristics and downhole pressures</td></tr>
+    </table>
+  </div>
+
+  <div class="def geo">
+    <h4>Well completion data</h4>
+    <p>The physical specification of the well as constructed — depth, casing dimensions, perforation intervals, pump setting depth, rod string configuration. Static information, but necessary context for interpreting anything the sensors report.</p>
+  </div>
+
+  <p>The fifth entry deserves particular attention. Rod failure and pump unsetting history is labelled failure data — a record of when things broke and under what conditions. That is exactly the input a failure-prediction model requires, and its explicit mention suggests Oil India anticipates a predictive maintenance component.</p>
+
+  <p>Practically, we should assume we will be generating realistic synthetic data from published reservoir and rod-pump physics, structured to match these seven categories. If actual field data becomes available later, a system built to this schema will accept it.</p>
+</section>
+
+<section class="major">
+  <div class="num">Nine</div>
+  <h2>How we will be judged</h2>
+
+  <p>The brief lists expected benefits separately from expected solution. These are the outcomes Oil India wants, and they are the terms in which our results should be presented.</p>
+
+  <ul class="bullets">
+    <li>Increased oil production and recovery</li>
+    <li>Reduced Steam–Oil Ratio</li>
+    <li>Lower energy consumption per barrel</li>
+    <li>Reduced rod failures and pump unsetting</li>
+    <li>Improved equipment life and operational reliability</li>
+    <li>Data-driven and predictive decision making</li>
+  </ul>
+
+  <div class="callout-dark">Every item on that list is an operational or financial outcome. <span class="gold">Not one is a technical metric.</span> This should shape how we build the interface — a dashboard reporting model accuracy answers a question Oil India did not ask, while one reporting projected SOR reduction and avoided failures answers the one they did.</div>
+</section>
+
+<section class="major">
+  <div class="num">Ten</div>
+  <h2>Glossary</h2>
+
+  <dl class="glossary">
+    <div><dt>API gravity</dt><dd>Inverted density scale for crude. Lower is heavier. Baghewala is 17–19°, classed as heavy.</dd></div>
+    <div><dt>Artificial lift</dt><dd>Mechanical means of raising well fluid when reservoir pressure is insufficient.</dd></div>
+    <div><dt>Asphaltene</dt><dd>Heaviest fraction of crude oil. Precipitates when conditions change, causing deposits and blockages.</dd></div>
+    <div><dt>CSS</dt><dd>Cyclic Steam Stimulation. Inject steam, soak, produce, repeat. The same well does both jobs.</dd></div>
+    <div><dt>Digital twin</dt><dd>Live software model of a specific physical asset, updated from its own sensors.</dd></div>
+    <div><dt>EOR</dt><dd>Enhanced Oil Recovery. Techniques beyond natural drive. Thermal EOR uses heat.</dd></div>
+    <div><dt>Impact loading</dt><dd>Shock load when a slack rod string is abruptly pulled taut. Causes fatigue damage.</dd></div>
+    <div><dt>Injection pressure</dt><dd>Force with which steam is driven into the formation.</dd></div>
+    <div><dt>Mobility</dt><dd>How readily fluid moves through rock. Falls as viscosity rises.</dd></div>
+    <div><dt>Primary recovery</dt><dd>Production using only the reservoir's natural pressure. Fails at Baghewala.</dd></div>
+    <div><dt>Production cut-off</dt><dd>Output threshold at which a well is taken off production and re-steamed.</dd></div>
+    <div><dt>Pump unsetting</dt><dd>Downhole pump dislodging from its seat under irregular loading.</dd></div>
+    <div><dt>Reservoir</dt><dd>Porous rock holding oil in its pore spaces. Not an underground cavern.</dd></div>
+    <div><dt>Rod failure</dt><dd>Fatigue fracture of the rod string. Halts production; requires pulling the full string.</dd></div>
+    <div><dt>Rod floating</dt><dd>Rod string descending too slowly through viscous fluid, leaving the string slack.</dd></div>
+    <div><dt>Rod string</dt><dd>Steel rods connecting the surface beam to the downhole pump, often a kilometre long.</dd></div>
+    <div><dt>Soak time</dt><dd>Shut-in period between steam injection and production. Has an optimum.</dd></div>
+    <div><dt>SOR</dt><dd>Steam–Oil Ratio. Barrels of steam per barrel of oil. The core efficiency metric.</dd></div>
+    <div><dt>SPM</dt><dd>Strokes per minute. Pump cycle rate. Adjusted via the VFD.</dd></div>
+    <div><dt>SRP</dt><dd>Sucker Rod Pump. The nodding-donkey beam pump.</dd></div>
+    <div><dt>Steam volume</dt><dd>Quantity of steam injected during a CSS cycle.</dd></div>
+    <div><dt>Stroke length</dt><dd>Vertical distance the rod string travels per pump cycle.</dd></div>
+    <div><dt>VFD</dt><dd>Variable Frequency Drive. Motor speed controller; the mechanism for changing SPM.</dd></div>
+    <div><dt>Viscosity</dt><dd>Resistance to flow, measured in centipoise. Falls sharply as temperature rises.</dd></div>
+    <div><dt>Well completion</dt><dd>The as-built specification of a well: depths, casing, perforations, equipment.</dd></div>
+    <div><dt>Wellbore</dt><dd>The drilled hole itself, connecting reservoir to surface.</dd></div>
+  </dl>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Errata — research document, 12 September 2026</title>
+<style>
+  /* Matches the plain word-processor layout of research.pdf. */
+  @page { size: Letter; margin: 0.8in 1in; }
+  body {
+    margin: 0;
+    font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.35;
+    color: #000;
+  }
+  h1 { font-size: 13pt; font-weight: 700; margin: 0 0 0.3em; }
+  .date { margin: 0 0 1em; }
+  h2 { font-size: 11pt; font-weight: 700; margin: 1.1em 0 0.3em; }
+  p { margin: 0 0 0.5em; }
+  .label { font-weight: 700; }
+  .foot {
+    margin-top: 1.4em;
+    padding-top: 0.5em;
+    border-top: 1px solid #999;
+    font-size: 9.5pt;
+  }
+</style>
+</head>
+<body>
+
+<h1>ERRATA</h1>
+<p class="date">Added 12 September 2026</p>
+
+<p>
+  This page corrects four points in the research document. It was added after
+  a review of all project documents against the merged technical reference
+  (SIH26120), which is the source of truth for the model. The pages before
+  this one are unchanged.
+</p>
+
+<h2>1. Viscosity law — Sections 3.4, 3.8, 3.11 and 7.2</h2>
+<p><span class="label">Written:</span> ln(μ<sub>o</sub>) = A + B/T<sub>K</sub>.</p>
+<p>
+  <span class="label">Correction:</span> The model uses the ASTM D341
+  (Walther) form instead: log<sub>10</sub>(log<sub>10</sub>(ν + 0.7)) = A −
+  B·log<sub>10</sub>(T), with T in kelvin, ν in cSt and μ = ν × SG. It is
+  anchored at 11,500 cP at 50 °C (the midpoint of the reported
+  10,000–13,000 cP), with SG = 0.963, B = 3.5 (assumed) and A = 9.3933. See
+  the technical reference, equation 3. The physical statement T ↑ ⇒ μ<sub>o</sub> ↓
+  is unchanged.
+</p>
+
+<h2>2. Baseline values — Sections 5.3 and 5.12</h2>
+<p>
+  <span class="label">Written:</span> the model baseline is 46–48 °C and
+  17–19° API, from the SIH problem statement.
+</p>
+<p>
+  <span class="label">Correction:</span> The model uses the Oil India field
+  values: native reservoir temperature T<sub>i</sub> = 50 °C (the reported
+  bottomhole temperature) and oil SG = 0.963 (from ρ<sub>o</sub> = 963 kg/m³,
+  about 15.4° API). The SIH values are kept for reference, and the difference
+  is cited openly. See the technical reference, section 5, "On the conflicting
+  values".
+</p>
+
+<h2>3. Cause of rod floating — Sections 2.6.4, 2.6.12, 7.6 and 8.3</h2>
+<p>
+  <span class="label">Written:</span> rod floating is linked to low pump
+  fillage and low reservoir inflow (Section 2.6.4, and Section 2.6.12,
+  causes A to C). Cause C traces high viscosity to floating through lower
+  inflow and pump underfill. Layer 1 is said not to capture rod floating
+  (Sections 7.6 and 8.3).
+</p>
+<p>
+  <span class="label">Correction:</span> Rod floating happens when the rods
+  cannot fall through the oil in the tubing as fast as the polished rod moves
+  down. It occurs when the required fall speed, S·N/30, is greater than the
+  available fall speed, which drops as oil viscosity rises. Its causes are
+  high oil viscosity, high pump speed and a long stroke. Low fillage causes
+  fluid pound, which is a different fault with a different dynamometer-card
+  shape. The two can occur together, but one does not cause the other.
+</p>
+<p>
+  The technical reference (equation 5) computes the floating limit
+  N<sub>max</sub> directly from viscosity, so the physics layer does predict
+  it. Dynamometer-card analysis (Layer 2) is still needed to confirm floating
+  in the field. Section 2.3.14 ("Low fillage should not automatically be
+  labelled rod floating") agrees with this correction.
+</p>
+
+<h2>4. CSS stages — Section 6.10</h2>
+<p>
+  <span class="label">Written:</span> four explicit stages — injection, soak,
+  production and cooling. Section 3.11 gives the same sequence.
+</p>
+<p>
+  <span class="label">Correction:</span> The model uses three phases:
+  injection, soak and production. Cooling is not a separate stage. It happens
+  during production, and heat lost during soak is included in the thermal
+  efficiency. This agrees with Section 4.6, which says cooling is not
+  necessarily a separate operational step but the natural result of heat
+  input stopping. See the technical reference, equation 7.
+</p>
+
+<p class="foot">
+  Source of truth: merged technical reference (SIH26120), revised
+  12 September 2026, public/documents/technical-reference.pdf.
+</p>
+
+</body>
+</html>
